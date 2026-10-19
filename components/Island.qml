@@ -20,14 +20,34 @@ Rectangle {
     border.color: Config.islandBorder
     border.width: 1
 
+    // Fluid organic water droplet expansion: transforms anchored to top bezel
+    transformOrigin: Item.Top
+    scale: Config.notchVisible ? 1.0 : 0.60
+    opacity: Config.notchVisible ? 1.0 : 0.0
+
     // Vertical slide transition: 0 when visible hanging from top, tucked offscreen when hidden
     y: Config.notchVisible ? 0 : -implicitHeight
 
     Behavior on y {
         NumberAnimation {
-            duration: Config.notchVisible ? 240 : 200
-            easing.type: Config.notchVisible ? Easing.OutBack : Easing.InCubic
-            easing.overshoot: 1.08
+            duration: Config.notchVisible ? 260 : 190
+            easing.type: Config.notchVisible ? Easing.OutBack : Easing.InQuad
+            easing.overshoot: 1.14
+        }
+    }
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: Config.notchVisible ? 280 : 180
+            easing.type: Config.notchVisible ? Easing.OutBack : Easing.InQuad
+            easing.overshoot: 1.12
+        }
+    }
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Config.notchVisible ? 180 : 140
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -36,6 +56,23 @@ Rectangle {
         id: expandedRow
         anchors.centerIn: parent
         spacing: 8
+        opacity: Config.notchVisible ? 1.0 : 0.0
+        scale: Config.notchVisible ? 1.0 : 0.88
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Config.notchVisible ? 220 : 120
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: Config.notchVisible ? 240 : 140
+                easing.type: Config.notchVisible ? Easing.OutBack : Easing.InQuad
+                easing.overshoot: 1.06
+            }
+        }
 
         // LEFT CLUSTER: System Monitors, Workspaces & Clock
         IslandPill {
