@@ -19,31 +19,50 @@ ShellRoot {
                     right: true
                 }
 
-                // Window height provides space for resting and expanded island
-                implicitHeight: 64
+                // Window height provides space for hanging and expanded island
+                implicitHeight: Config.expandedHeight + 14
                 color: "transparent"
 
-                // Space reserved for tiling windows
-                exclusiveZone: Config.expanded ? Config.expandedHeight + 4 : Config.compactHeight + 4
+                // Zero exclusiveZone: Never resize, tile, or disturb application windows!
+                exclusiveZone: 0
 
-                // Click-through mask: clicks outside the island pass directly to windows/desktop underneath
+                // Click-through mask:
+                // When notch is hidden, only the 3px top trigger hotspot is masked.
+                // When notch is visible, the entire island receives pointer input.
                 mask: Region {
-                    item: island
+                    item: Config.notchVisible ? island : topTrigger
+                }
+
+                // Top Edge Hotspot: catches mouse hovering at the top-center bezel
+                Item {
+                    id: topTrigger
+                    anchors.top: parent.top
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: Math.max(island.implicitWidth, 380)
+                    height: 4
+
+                    HoverHandler {
+                        onHoveredChanged: {
+                            if (hovered) {
+                                Config.notchHovered = true;
+                            }
+                        }
+                    }
                 }
 
                 Island {
                     id: island
                     anchors.top: parent.top
-                    anchors.topMargin: 4
+                    anchors.topMargin: 0
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
         }
     }
 
-    // Centered Modal Window per screen (mapped when powerModalVisible is true)
+    // Centered Modal Window per screen (only created when powerModalVisible is true)
     Variants {
-        model: Quickshell.screens
+        model: Config.powerModalVisible ? Quickshell.screens : []
         delegate: Component {
             PanelWindow {
                 id: modalWindow
@@ -60,7 +79,14 @@ ShellRoot {
 
                 color: "transparent"
 
-                PowerModal {}
+                Loader {
+                    anchors.fill: parent
+                    active: Config.powerModalVisible
+                    asynchronous: false
+                    sourceComponent: Component {
+                        PowerModal {}
+                    }
+                }
             }
         }
     }

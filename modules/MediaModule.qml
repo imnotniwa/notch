@@ -105,7 +105,14 @@ Item {
                 customPaddingV: 2
                 active: root.isPlaying
                 onClicked: {
-                    if (root.activePlayer) root.activePlayer.playPause();
+                    if (!root.activePlayer) return;
+                    if (typeof root.activePlayer.togglePlaying === "function") {
+                        root.activePlayer.togglePlaying();
+                    } else if (root.isPlaying && typeof root.activePlayer.pause === "function") {
+                        root.activePlayer.pause();
+                    } else if (typeof root.activePlayer.play === "function") {
+                        root.activePlayer.play();
+                    }
                 }
             }
 

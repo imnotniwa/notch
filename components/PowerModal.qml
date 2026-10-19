@@ -11,6 +11,13 @@ Item {
 
     anchors.fill: parent
 
+    Component.onCompleted: {
+        root.viewState = "menu";
+        modalCard.scale = 0.92;
+        modalCard.opacity = 0;
+        openAnim.start();
+    }
+
     // Reset view state whenever modal is opened
     onVisibleChanged: {
         if (visible) {

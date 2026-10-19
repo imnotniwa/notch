@@ -62,7 +62,7 @@ Item {
     Timer {
         interval: 2500
         repeat: true
-        running: true
+        running: Config.expanded
         triggeredOnStart: true
         onTriggered: {
             updateCpu();

@@ -12,11 +12,26 @@ Rectangle {
     implicitWidth: isExpanded ? Math.max(expandedRow.implicitWidth + 36, 760) : (compactView.implicitWidth + 32)
     implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
 
-    // Apple smooth squircle radius
-    radius: isExpanded ? 22 : Config.pillRadius
+    // Smooth hanging notch corners: bottom corners rounded, top flush with screen edge
+    bottomLeftRadius: isExpanded ? 22 : Config.pillRadius
+    bottomRightRadius: isExpanded ? 22 : Config.pillRadius
+    topLeftRadius: 0
+    topRightRadius: 0
+
     color: Config.islandBg
     border.color: Config.islandBorder
     border.width: 1
+
+    // Vertical slide transition: 0 when visible hanging from top, tucked offscreen when hidden
+    y: Config.notchVisible ? 0 : -implicitHeight
+
+    Behavior on y {
+        NumberAnimation {
+            duration: Config.notchVisible ? 240 : 200
+            easing.type: Config.notchVisible ? Easing.OutBack : Easing.InCubic
+            easing.overshoot: 1.08
+        }
+    }
 
     // Apple fluid spring morphing (WWDC 2018: Designing Fluid Interfaces)
     Behavior on implicitWidth {
@@ -28,13 +43,6 @@ Rectangle {
     }
 
     Behavior on implicitHeight {
-        NumberAnimation {
-            duration: Config.animDuration
-            easing.type: Easing.OutCubic
-        }
-    }
-
-    Behavior on radius {
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutCubic
@@ -137,9 +145,10 @@ Rectangle {
     // Graceful hover hysteresis timer to prevent flicker near edges
     Timer {
         id: exitHysteresisTimer
-        interval: 160
+        interval: 220
         onTriggered: {
             Config.isHovered = false;
+            Config.notchHovered = false;
         }
     }
 
@@ -148,6 +157,7 @@ Rectangle {
         onHoveredChanged: {
             if (hovered) {
                 exitHysteresisTimer.stop();
+                Config.notchHovered = true;
                 Config.isHovered = true;
             } else {
                 exitHysteresisTimer.restart();

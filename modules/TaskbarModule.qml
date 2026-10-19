@@ -15,7 +15,7 @@ Item {
     Connections {
         target: Hyprland
         function onRawEvent(event) {
-            if (event.name === "openwindow" || event.name === "closewindow" || event.name === "movewindow" || event.name === "activewindow") {
+            if (event.name === "openwindow" || event.name === "closewindow" || event.name === "movewindow" || event.name === "activewindow" || event.name === "windowtitle" || event.name === "fullscreen") {
                 Hyprland.refreshToplevels();
             }
         }
@@ -26,7 +26,7 @@ Item {
     }
 
     Timer {
-        interval: 1000
+        interval: 10000
         repeat: true
         running: true
         onTriggered: {

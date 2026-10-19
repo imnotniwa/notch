@@ -19,8 +19,6 @@ Item {
         height: 24
         scale: Math.min(root.width, root.height) / 24.0
         transformOrigin: Item.Center
-        layer.enabled: true
-        layer.smooth: true
 
         // --- LOCK ICON ---
         // Lock body (rounded rectangle)

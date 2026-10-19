@@ -40,7 +40,7 @@ Item {
     Timer {
         interval: 1500
         repeat: true
-        running: true
+        running: Config.expanded
         triggeredOnStart: true
         onTriggered: root.refreshBrightness()
     }
