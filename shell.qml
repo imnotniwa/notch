@@ -33,39 +33,15 @@ ShellRoot {
                     item: Config.notchVisible ? island : topTrigger
                 }
 
-                // Top Edge Indicator Line & Trigger Hotspot
+                // Top Edge Hotspot: catches mouse hovering strictly within notch's width at top bezel
                 Item {
                     id: topTrigger
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: island.implicitWidth
-                    height: 10
-
-                    // Sleek Apple home-bar/notch indicator line at the top screen bezel
-                    Rectangle {
-                        id: indicatorLine
-                        anchors.top: parent.top
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 140
-                        height: 3
-                        bottomLeftRadius: 2
-                        bottomRightRadius: 2
-                        color: triggerHover.hovered ? Config.actBg : Qt.rgba(1, 1, 1, 0.45)
-                        opacity: Config.notchVisible ? 0 : 1
-
-                        Behavior on opacity {
-                            NumberAnimation { duration: 180 }
-                        }
-                        Behavior on color {
-                            ColorAnimation { duration: 160 }
-                        }
-                        Behavior on width {
-                            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-                        }
-                    }
+                    height: 8
 
                     HoverHandler {
-                        id: triggerHover
                         onHoveredChanged: {
                             if (hovered) {
                                 Config.notchHovered = true;
