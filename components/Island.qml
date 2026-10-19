@@ -25,8 +25,18 @@ Rectangle {
     scale: Config.notchVisible ? 1.0 : 0.60
     opacity: Config.notchVisible ? 1.0 : 0.0
 
-    // Vertical slide transition: 0 when visible hanging from top, tucked offscreen when hidden
-    y: Config.notchVisible ? 0 : -implicitHeight
+    // Vertical slide transition: -1 when visible (flush/bleeding into top bezel), tucked offscreen when hidden
+    y: Config.notchVisible ? -1 : -(implicitHeight + 10)
+
+    // Flush top lip: covers any 1px sub-pixel line or top border seam with bezel
+    Rectangle {
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 2
+        color: Config.islandBg
+        z: 2
+    }
 
     Behavior on y {
         NumberAnimation {
