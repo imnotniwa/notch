@@ -21,7 +21,11 @@ Item {
     readonly property bool hasMedia: activePlayer !== null && (activePlayer.trackTitle !== "" || activePlayer.playbackState === MprisPlaybackState.Playing)
     readonly property bool isPlaying: activePlayer ? activePlayer.playbackState === MprisPlaybackState.Playing : false
     readonly property string title: activePlayer ? (activePlayer.trackTitle || "Media") : ""
-    readonly property string artist: activePlayer && activePlayer.trackArtists && activePlayer.trackArtists.length > 0 ? activePlayer.trackArtists.join(", ") : ""
+    readonly property string artist: {
+        if (!activePlayer || !activePlayer.trackArtists) return "";
+        if (Array.isArray(activePlayer.trackArtists)) return activePlayer.trackArtists.join(", ");
+        return activePlayer.trackArtists.toString();
+    }
 
     implicitWidth: hasMedia ? contentRow.implicitWidth + 16 : 0
     implicitHeight: 28

@@ -58,8 +58,8 @@ Item {
             joinStyle: ShapePath.RoundJoin
             // Crescent moon contour
             startX: 20; startY: 13
-            PathArc { x: 11; y: 4; radiusX: 9; radiusY: 9; direction: ShapePath.Counterclockwise }
-            PathArc { x: 20; y: 13; radiusX: 7; radiusY: 7; direction: ShapePath.Clockwise }
+            PathArc { x: 11; y: 4; radiusX: 9; radiusY: 9; direction: PathArc.Counterclockwise }
+            PathArc { x: 20; y: 13; radiusX: 7; radiusY: 7; direction: PathArc.Clockwise }
         }
 
         // --- LOGOUT / EXIT ICON ---
@@ -106,9 +106,9 @@ Item {
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
             startX: 20; startY: 10
-            PathArc { x: 12; y: 20; radiusX: 8; radiusY: 8; direction: ShapePath.Clockwise }
-            PathArc { x: 5; y: 12; radiusX: 8; radiusY: 8; direction: ShapePath.Clockwise }
-            PathArc { x: 10; y: 5; radiusX: 8; radiusY: 8; direction: ShapePath.Clockwise }
+            PathArc { x: 12; y: 20; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathArc { x: 5; y: 12; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathArc { x: 10; y: 5; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
         }
         // Restart arrow head
         ShapePath {
@@ -141,8 +141,8 @@ Item {
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
             startX: 17.5; startY: 6.5
-            PathArc { x: 12; y: 21; radiusX: 8; radiusY: 8; direction: ShapePath.Clockwise }
-            PathArc { x: 6.5; y: 6.5; radiusX: 8; radiusY: 8; direction: ShapePath.Clockwise }
+            PathArc { x: 12; y: 21; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathArc { x: 6.5; y: 6.5; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
         }
 
         // --- CLOSE / CANCEL ICON ---
