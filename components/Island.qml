@@ -12,17 +12,18 @@ Rectangle {
     implicitWidth: isExpanded ? Math.max(expandedRow.implicitWidth + 36, 760) : (compactView.implicitWidth + 32)
     implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
 
-    radius: isExpanded ? 20 : Config.pillRadius
+    // Apple smooth squircle radius
+    radius: isExpanded ? 22 : Config.pillRadius
     color: Config.islandBg
     border.color: Config.islandBorder
     border.width: 1
 
-    // Elastic Apple Dynamic Island morph animation
+    // Apple fluid spring morphing (WWDC 2018: Designing Fluid Interfaces)
     Behavior on implicitWidth {
         NumberAnimation {
             duration: Config.springDuration
             easing.type: Easing.OutBack
-            easing.overshoot: 1.15
+            easing.overshoot: 1.08
         }
     }
 
@@ -40,15 +41,19 @@ Rectangle {
         }
     }
 
-    // Compact View (visible when resting)
+    // Compact View (visible when resting with coordinated scale & cross-fade)
     CompactIsland {
         id: compactView
         anchors.centerIn: parent
-        visible: opacity > 0.05
+        visible: opacity > 0.02
         opacity: root.isExpanded ? 0 : 1
+        scale: root.isExpanded ? 0.92 : 1.0
 
         Behavior on opacity {
-            NumberAnimation { duration: 180 }
+            NumberAnimation { duration: 160 }
+        }
+        Behavior on scale {
+            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
         }
     }
 
@@ -56,12 +61,16 @@ Rectangle {
     RowLayout {
         id: expandedRow
         anchors.centerIn: parent
-        visible: opacity > 0.05
+        visible: opacity > 0.02
         opacity: root.isExpanded ? 1 : 0
+        scale: root.isExpanded ? 1.0 : 0.94
         spacing: 8
 
         Behavior on opacity {
-            NumberAnimation { duration: 220 }
+            NumberAnimation { duration: 200 }
+        }
+        Behavior on scale {
+            NumberAnimation { duration: 260; easing.type: Easing.OutBack; easing.overshoot: 1.06 }
         }
 
         // LEFT CLUSTER: System Monitors, Workspaces & Clock
@@ -125,10 +134,24 @@ Rectangle {
         }
     }
 
+    // Graceful hover hysteresis timer to prevent flicker near edges
+    Timer {
+        id: exitHysteresisTimer
+        interval: 160
+        onTriggered: {
+            Config.isHovered = false;
+        }
+    }
+
     // Modern pointer handlers: Never block child button clicks
     HoverHandler {
         onHoveredChanged: {
-            Config.isHovered = hovered;
+            if (hovered) {
+                exitHysteresisTimer.stop();
+                Config.isHovered = true;
+            } else {
+                exitHysteresisTimer.restart();
+            }
         }
     }
 

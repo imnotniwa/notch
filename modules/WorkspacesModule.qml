@@ -57,8 +57,16 @@ Item {
                 implicitHeight: 20
                 radius: 10
 
-                Behavior on implicitWidth {
-                    NumberAnimation { duration: 250; easing.type: Easing.OutBack }
+                // Apple tactile feedback: scale on press, spring back
+                scale: wsMouse.pressed ? 0.90 : (wsMouse.containsMouse ? 1.05 : 1.0)
+                transformOrigin: Item.Center
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: wsMouse.pressed ? 60 : 200
+                        easing.type: wsMouse.pressed ? Easing.OutQuad : Easing.OutBack
+                        easing.overshoot: 1.15
+                    }
                 }
 
                 color: isCurrent ? Config.actBg : (wsMouse.containsMouse ? Qt.rgba(Config.hvrBg.r, Config.hvrBg.g, Config.hvrBg.b, 0.3) : Qt.rgba(1, 1, 1, 0.08))

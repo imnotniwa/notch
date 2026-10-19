@@ -10,7 +10,7 @@ Rectangle {
     property string tooltip: ""
     property bool active: false
     property color textColor: active ? Config.actFg : (mouseArea.containsMouse ? Config.hvrFg : Config.mainFg)
-    property color hoverBgColor: Config.hvrBg
+    property color hoverBgColor: Qt.rgba(1, 1, 1, 0.10)
     property color activeBgColor: Config.actBg
     property int customPaddingH: 6
     property int customPaddingV: 3
@@ -23,12 +23,25 @@ Rectangle {
 
     implicitWidth: contentRow.implicitWidth + (customPaddingH * 2)
     implicitHeight: Math.max(contentRow.implicitHeight + (customPaddingV * 2), 22)
-    radius: 8
+    radius: 7
 
-    color: active ? activeBgColor : (mouseArea.containsMouse ? Qt.rgba(hoverBgColor.r, hoverBgColor.g, hoverBgColor.b, 0.25) : "transparent")
+    // Apple tactile feedback: scale down on press, spring back on release
+    scale: mouseArea.pressed ? 0.93 : (mouseArea.containsMouse ? 1.02 : 1.0)
+    transformOrigin: Item.Center
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: mouseArea.pressed ? 60 : 180
+            easing.type: mouseArea.pressed ? Easing.OutQuad : Easing.OutBack
+            easing.overshoot: 1.12
+        }
+    }
+
+    // Apple subtle translucent material highlight
+    color: active ? activeBgColor : (mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.16) : (mouseArea.containsMouse ? hoverBgColor : "transparent"))
 
     Behavior on color {
-        ColorAnimation { duration: 150 }
+        ColorAnimation { duration: 120 }
     }
 
     RowLayout {

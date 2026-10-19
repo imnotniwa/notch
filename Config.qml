@@ -8,34 +8,39 @@ Item {
     readonly property int fontSize: 10
     readonly property int iconSize: 13
     
-    readonly property int compactHeight: 34
-    readonly property int expandedHeight: 52
-    readonly property int compactWidth: 460
-    readonly property int pillRadius: 17
-    readonly property int innerPillRadius: 12
+    readonly property int compactHeight: 32
+    readonly property int expandedHeight: 50
+    readonly property int compactWidth: 440
+    readonly property int pillRadius: 16
+    readonly property int innerPillRadius: 11
 
     // Apple Dynamic Island + Rose Pine Palette
-    readonly property color islandBg: "#0d0e17"
-    readonly property color islandBorder: "#26233a"
-    readonly property color subPillBg: "#191724"
-    readonly property color subPillBorder: "#21202e"
+    // Pure pitch OLED black for the outer island capsule
+    readonly property color islandBg: "#000000"
+    // Delicate specular rim that catches the light
+    readonly property color islandBorder: Qt.rgba(1, 1, 1, 0.14)
+    readonly property color subPillBg: Qt.rgba(1, 1, 1, 0.07)
+    readonly property color subPillBorder: Qt.rgba(1, 1, 1, 0.08)
     
-    readonly property color mainFg: "#ebbcba"
-    readonly property color dimFg: "#908caa"
+    // High contrast vibrant typography
+    readonly property color mainFg: "#f0f0f5"
+    readonly property color dimFg: "#9898a6"
     
-    readonly property color actBg: "#31748f"
-    readonly property color actFg: "#9ccfd8"
+    // Apple vibrant system accents
+    readonly property color actBg: "#0a84ff"
+    readonly property color actFg: "#ffffff"
     
     readonly property color hvrBg: "#eb6f92"
-    readonly property color hvrFg: "#f6c177"
+    readonly property color hvrFg: "#ffffff"
     
-    readonly property color success: "#9ccfd8"
-    readonly property color warning: "#f6c177"
-    readonly property color danger: "#eb6f92"
+    readonly property color success: "#30d158"
+    readonly property color warning: "#ffd60a"
+    readonly property color danger: "#ff453a"
 
-    // Animation Settings
-    readonly property int animDuration: 280
-    readonly property int springDuration: 340
+    // Apple Spring Dynamics
+    // Damping ~1.0 with subtle natural settling
+    readonly property int animDuration: 240
+    readonly property int springDuration: 300
 
     // Global Interactive States
     property bool isPinned: false
@@ -46,7 +51,6 @@ Item {
     readonly property bool expanded: isPinned || isHovered || manualExpand
 
     // Plug-and-Play Module Declarations
-    // Reorder, remove, or add custom module names here without touching core code!
     property var compactModules: ["workspace", "window", "battery", "volume", "clock"]
     property var expandedLeft: ["sysmon", "workspaces"]
     property var expandedCenter: ["media", "taskbar"]
