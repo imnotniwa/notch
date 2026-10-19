@@ -33,6 +33,9 @@ ShellRoot {
                 // Zero exclusiveZone: Never resize, tile, or disturb application windows!
                 exclusiveZone: 0
 
+                // Dynamic Horizontal Anchor: island drops down centered on where cursor entered the top bezel
+                property real targetX: (barWindow.width - island.implicitWidth) / 2
+
                 // Click-through mask:
                 // When notch is hidden, only the top trigger hotspot is masked.
                 // When notch is visible, the entire island receives pointer input.
@@ -40,17 +43,25 @@ ShellRoot {
                     item: Config.notchVisible ? island : topTrigger
                 }
 
-                // Top Edge Hotspot: catches mouse hovering strictly within notch's width at top bezel
+                // Top Edge Hotspot: catches mouse hovering along the top bezel
                 Item {
                     id: topTrigger
                     anchors.top: parent.top
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    width: island.implicitWidth
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     height: 8
 
                     HoverHandler {
+                        id: topHover
                         onHoveredChanged: {
                             if (hovered) {
+                                // Center island on the cursor x touchpoint, clamped within screen margins
+                                let halfW = island.implicitWidth / 2;
+                                let margin = 16;
+                                let minX = margin;
+                                let maxX = Math.max(margin, barWindow.width - island.implicitWidth - margin);
+                                let desiredX = topHover.point.position.x - halfW;
+                                barWindow.targetX = Math.max(minX, Math.min(maxX, desiredX));
                                 Config.notchHovered = true;
                             }
                         }
@@ -59,7 +70,14 @@ ShellRoot {
 
                 Island {
                     id: island
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    x: barWindow.targetX
+
+                    Behavior on x {
+                        NumberAnimation {
+                            duration: 220
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
             }
         }
