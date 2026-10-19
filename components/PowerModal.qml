@@ -58,7 +58,7 @@ Item {
         id: modalCard
         anchors.centerIn: parent
         width: 380
-        implicitHeight: contentColumn.implicitHeight + 40
+        implicitHeight: contentColumn.implicitHeight + 48
         radius: 20
         color: Config.islandBg
         border.color: Config.islandBorder
@@ -73,7 +73,7 @@ Item {
         ColumnLayout {
             id: contentColumn
             anchors.centerIn: parent
-            width: parent.width - 40
+            width: parent.width - 48
             spacing: 16
 
             // 1. MAIN MENU VIEW
@@ -87,7 +87,7 @@ Item {
                     Layout.fillWidth: true
 
                     ColumnLayout {
-                        spacing: 2
+                        spacing: 3
                         Text {
                             text: "Power Options"
                             color: Config.mainFg
@@ -128,26 +128,34 @@ Item {
 
                     // Lock Button
                     Rectangle {
+                        id: lockBtnCard
                         Layout.fillWidth: true
-                        height: 42
-                        radius: 10
-                        color: lockMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.25) : Config.subPillBg
-                        border.color: Config.subPillBorder
+                        height: 48
+                        radius: 12
+                        scale: lockMouse.pressed ? 0.97 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        color: lockMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.22) : Config.subPillBg
+                        border.color: lockMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.4) : Config.subPillBorder
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
                             spacing: 12
 
                             Text {
                                 text: "󰌾"
                                 color: Config.actFg
                                 font.family: Config.fontFamily
-                                font.pixelSize: 16
+                                font.pixelSize: 17
+                                Layout.alignment: Qt.AlignVCenter
                             }
                             ColumnLayout {
-                                spacing: 1
+                                spacing: 2
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
                                 Text {
                                     text: "Lock Screen"
                                     color: Config.mainFg
@@ -178,26 +186,34 @@ Item {
 
                     // Sleep / Suspend Button
                     Rectangle {
+                        id: sleepBtnCard
                         Layout.fillWidth: true
-                        height: 42
-                        radius: 10
-                        color: sleepMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.25) : Config.subPillBg
-                        border.color: Config.subPillBorder
+                        height: 48
+                        radius: 12
+                        scale: sleepMouse.pressed ? 0.97 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        color: sleepMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.22) : Config.subPillBg
+                        border.color: sleepMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.4) : Config.subPillBorder
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
                             spacing: 12
 
                             Text {
                                 text: "󰒲"
                                 color: Config.actFg
                                 font.family: Config.fontFamily
-                                font.pixelSize: 16
+                                font.pixelSize: 17
+                                Layout.alignment: Qt.AlignVCenter
                             }
                             ColumnLayout {
-                                spacing: 1
+                                spacing: 2
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
                                 Text {
                                     text: "Sleep"
                                     color: Config.mainFg
@@ -228,26 +244,34 @@ Item {
 
                     // Logout Button
                     Rectangle {
+                        id: logoutBtnCard
                         Layout.fillWidth: true
-                        height: 42
-                        radius: 10
-                        color: logoutMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.25) : Config.subPillBg
-                        border.color: Config.subPillBorder
+                        height: 48
+                        radius: 12
+                        scale: logoutMouse.pressed ? 0.97 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        color: logoutMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.22) : Config.subPillBg
+                        border.color: logoutMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.4) : Config.subPillBorder
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
                             spacing: 12
 
                             Text {
                                 text: "󰗽"
                                 color: Config.actFg
                                 font.family: Config.fontFamily
-                                font.pixelSize: 16
+                                font.pixelSize: 17
+                                Layout.alignment: Qt.AlignVCenter
                             }
                             ColumnLayout {
-                                spacing: 1
+                                spacing: 2
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
                                 Text {
                                     text: "Log Out"
                                     color: Config.mainFg
@@ -277,26 +301,34 @@ Item {
 
                     // Reboot Button
                     Rectangle {
+                        id: rebootBtnCard
                         Layout.fillWidth: true
-                        height: 42
-                        radius: 10
-                        color: rebootMouse.containsMouse ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.25) : Config.subPillBg
-                        border.color: Config.subPillBorder
+                        height: 48
+                        radius: 12
+                        scale: rebootMouse.pressed ? 0.97 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        color: rebootMouse.containsMouse ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.22) : Config.subPillBg
+                        border.color: rebootMouse.containsMouse ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.4) : Config.subPillBorder
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
                             spacing: 12
 
                             Text {
                                 text: "󰜉"
                                 color: Config.warning
                                 font.family: Config.fontFamily
-                                font.pixelSize: 16
+                                font.pixelSize: 17
+                                Layout.alignment: Qt.AlignVCenter
                             }
                             ColumnLayout {
-                                spacing: 1
+                                spacing: 2
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
                                 Text {
                                     text: "Restart"
                                     color: Config.mainFg
@@ -326,26 +358,34 @@ Item {
 
                     // Shutdown Button
                     Rectangle {
+                        id: shutdownBtnCard
                         Layout.fillWidth: true
-                        height: 42
-                        radius: 10
-                        color: shutdownMouse.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.25) : Config.subPillBg
-                        border.color: Config.subPillBorder
+                        height: 48
+                        radius: 12
+                        scale: shutdownMouse.pressed ? 0.97 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        color: shutdownMouse.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.22) : Config.subPillBg
+                        border.color: shutdownMouse.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.4) : Config.subPillBorder
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.margins: 12
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
                             spacing: 12
 
                             Text {
                                 text: ""
                                 color: Config.danger
                                 font.family: Config.fontFamily
-                                font.pixelSize: 16
+                                font.pixelSize: 17
+                                Layout.alignment: Qt.AlignVCenter
                             }
                             ColumnLayout {
-                                spacing: 1
+                                spacing: 2
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
                                 Text {
                                     text: "Shut Down"
                                     color: Config.mainFg
@@ -380,8 +420,6 @@ Item {
                 visible: root.viewState !== "menu"
                 Layout.fillWidth: true
                 spacing: 16
-
-                Item { height: 6 }
 
                 // Big Warning / Action Icon
                 Rectangle {
@@ -430,9 +468,13 @@ Item {
 
                     // Cancel
                     Rectangle {
+                        id: cancelBtn
                         Layout.fillWidth: true
-                        height: 38
+                        height: 40
                         radius: 10
+                        scale: cancelMouse.pressed ? 0.96 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
                         color: cancelMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Config.subPillBg
                         border.color: Config.subPillBorder
                         border.width: 1
@@ -461,8 +503,11 @@ Item {
                     Rectangle {
                         id: confirmBtn
                         Layout.fillWidth: true
-                        height: 38
+                        height: 40
                         radius: 10
+                        scale: confirmMouse.pressed ? 0.96 : 1.0
+                        transformOrigin: Item.Center
+                        Behavior on scale { NumberAnimation { duration: 100 } }
                         color: root.viewState === "confirm_shutdown" ? Config.danger : (root.viewState === "confirm_reboot" ? Config.warning : Config.actBg)
 
                         Text {
@@ -475,6 +520,7 @@ Item {
                         }
 
                         MouseArea {
+                            id: confirmMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
