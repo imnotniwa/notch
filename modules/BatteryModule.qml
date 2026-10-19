@@ -7,12 +7,16 @@ import ".."
 Item {
     id: root
 
+    property bool compactMode: false
+
     implicitWidth: btn.implicitWidth
     implicitHeight: btn.implicitHeight
 
     property int capacity: 100
     property string status: "Full"
-    property bool isCharging: status === "Charging"
+    readonly property bool isCharging: status === "Charging"
+    readonly property bool isFull: status === "Full"
+    readonly property bool isDischarging: status === "Discharging" || (!isCharging && !isFull)
 
     readonly property var icons: ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"]
 
@@ -20,6 +24,13 @@ Item {
         if (root.isCharging) return "";
         let idx = Math.min(Math.floor((root.capacity / 100) * (icons.length - 1)), icons.length - 1);
         return icons[Math.max(0, idx)];
+    }
+
+    readonly property color batteryColor: {
+        if (root.capacity <= 15) return Config.danger;
+        if (root.capacity <= 30) return Config.warning;
+        if (root.isCharging) return Config.actFg;
+        return Config.mainFg;
     }
 
     FileView {
@@ -50,7 +61,9 @@ Item {
     IslandButton {
         id: btn
         icon: root.icon
-        text: root.capacity + "%"
+        // In compact mode: always show percentage if not charged / discharging
+        text: (root.compactMode ? (root.isDischarging ? root.capacity + "%" : "") : root.capacity + "%")
+        textColor: root.batteryColor
         tooltip: "Battery: " + root.capacity + "% (" + root.status + ")"
     }
 }

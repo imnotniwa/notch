@@ -105,6 +105,12 @@ Item {
             spacing: 8
             Layout.alignment: Qt.AlignVCenter
 
+            // Battery indicator (shows percentage if on battery / not charging)
+            BatteryModule {
+                compactMode: true
+                Layout.alignment: Qt.AlignVCenter
+            }
+
             // Volume indicator
             RowLayout {
                 spacing: 3

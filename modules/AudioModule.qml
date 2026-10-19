@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Pipewire
-import Quickshell.Hyprland
 import "../components"
 import ".."
 
@@ -45,35 +44,32 @@ Item {
             tooltip: (root.isMuted ? "Muted" : "Volume: " + root.volumePct + "%") + " (Scroll: Adjust, Click: Pavucontrol, Middle: Mute)"
 
             onClicked: {
-                Hyprland.dispatch("exec pavucontrol-qt -t 3 || pavucontrol -t 3");
-            }
-            onRightClicked: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -s ''");
+                Config.run("pavucontrol || pavucontrol-qt");
             }
             onMiddleClicked: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -o m");
+                Config.run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
             }
             onScrolledUp: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -o i");
+                Config.run("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+");
             }
             onScrolledDown: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -o d");
+                Config.run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-");
             }
         }
 
         // Microphone Button
         IslandButton {
             icon: root.micIcon
-            tooltip: (root.micMuted ? "Mic Muted" : "Mic Active") + " (Middle: Mute toggle)"
+            tooltip: (root.micMuted ? "Mic Muted" : "Mic Active") + " (Middle: Mute toggle, Scroll: Gain)"
             active: root.micMuted
             onMiddleClicked: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -i m");
+                Config.run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle");
             }
             onScrolledUp: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -i i");
+                Config.run("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SOURCE@ 5%+");
             }
             onScrolledDown: {
-                Hyprland.dispatch("exec hyde-shell volumecontrol -i d");
+                Config.run("wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-");
             }
         }
     }

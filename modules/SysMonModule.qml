@@ -142,7 +142,7 @@ Item {
             text: root.gpuTemp
             tooltip: "GPU Info (Click to toggle)"
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell gpuinfo --toggle");
+                Config.run("hyde-shell gpuinfo --toggle");
             }
         }
     }

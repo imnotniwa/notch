@@ -1,14 +1,15 @@
 pragma Singleton
 import QtQuick
+import Quickshell.Io
 
-QtObject {
+Item {
     // Fonts & Dimensions
     readonly property string fontFamily: "JetBrainsMono Nerd Font"
     readonly property int fontSize: 10
     readonly property int iconSize: 13
     
     readonly property int compactHeight: 34
-    readonly property int expandedHeight: 46
+    readonly property int expandedHeight: 52
     readonly property int compactWidth: 460
     readonly property int pillRadius: 17
     readonly property int innerPillRadius: 12
@@ -34,7 +35,7 @@ QtObject {
 
     // Animation Settings
     readonly property int animDuration: 280
-    readonly property int springDuration: 320
+    readonly property int springDuration: 340
 
     // Global Interactive States
     property bool isPinned: false
@@ -42,4 +43,21 @@ QtObject {
     property bool manualExpand: false
 
     readonly property bool expanded: isPinned || isHovered || manualExpand
+
+    // Plug-and-Play Module Declarations
+    // Reorder, remove, or add custom module names here without touching core code!
+    property var compactModules: ["workspace", "window", "battery", "volume", "clock"]
+    property var expandedLeft: ["sysmon", "workspaces"]
+    property var expandedCenter: ["media", "taskbar"]
+    property var expandedRight: ["audio", "backlight", "quicksettings", "battery"]
+
+    // Global command runner
+    Process {
+        id: procRunner
+    }
+
+    function run(cmd) {
+        if (!cmd) return;
+        procRunner.exec(["sh", "-c", cmd]);
+    }
 }

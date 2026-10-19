@@ -93,11 +93,11 @@ Item {
 
                     onClicked: (evt) => {
                         if (evt.button === Qt.LeftButton) {
-                            Hyprland.dispatch("focuswindow address:" + taskItem.modelData.address);
+                            HyprlandLua.focusWindow(taskItem.modelData.address);
                         } else if (evt.button === Qt.RightButton) {
-                            Hyprland.dispatch("fullscreen 1");
+                            HyprlandLua.fullscreenWindow();
                         } else if (evt.button === Qt.MiddleButton) {
-                            Hyprland.dispatch("closewindow address:" + taskItem.modelData.address);
+                            HyprlandLua.closeWindow(taskItem.modelData.address);
                         }
                     }
                 }

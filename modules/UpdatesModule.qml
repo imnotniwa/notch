@@ -42,7 +42,7 @@ Item {
         text: root.text
         tooltip: root.tip + " (Click to upgrade)"
         onClicked: {
-            Hyprland.dispatch("exec hyde-shell system.update up");
+            Config.run("hyde-shell system.update up");
         }
     }
 }

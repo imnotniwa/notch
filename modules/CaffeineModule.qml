@@ -46,7 +46,7 @@ Item {
         tooltip: root.tip
         active: root.active
         onClicked: {
-            Hyprland.dispatch("exec hyde-shell caffeine -t -P waybar,21");
+            Config.run("hyde-shell caffeine -t -P waybar,21");
             refreshTimer.start();
         }
     }

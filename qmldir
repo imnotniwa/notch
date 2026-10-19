@@ -1,1 +1,2 @@
 singleton Config 1.0 Config.qml
+singleton HyprlandLua 1.0 core/HyprlandLua.qml

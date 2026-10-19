@@ -9,7 +9,7 @@ Rectangle {
     // Sizing animates smoothly between compact and expanded
     property bool isExpanded: Config.expanded
 
-    implicitWidth: isExpanded ? Math.max(expandedRow.implicitWidth + 32, 700) : (compactView.implicitWidth + 32)
+    implicitWidth: isExpanded ? Math.max(expandedRow.implicitWidth + 36, 760) : (compactView.implicitWidth + 32)
     implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
 
     radius: isExpanded ? 20 : Config.pillRadius
@@ -52,7 +52,7 @@ Rectangle {
         }
     }
 
-    // Expanded View (visible when hovered or pinned)
+    // Expanded View (Recommendation A: Media & Quick Settings Deck)
     RowLayout {
         id: expandedRow
         anchors.centerIn: parent
@@ -64,49 +64,56 @@ Rectangle {
             NumberAnimation { duration: 220 }
         }
 
-        // LEFT PILLS
-        // 1. System Monitors (CPU, Memory, GPU)
+        // LEFT CLUSTER: System Monitors, Workspaces & Clock
         IslandPill {
             SysMonModule {}
         }
 
-        // 2. Caffeine & Clock
-        IslandPill {
-            CaffeineModule {}
-            ClockModule {}
-        }
-
-        // 3. Workspaces
         IslandPill {
             WorkspacesModule {}
         }
 
-        // CENTER PILL
-        // 4. Taskbar / Active Windows
         IslandPill {
-            TaskbarModule {}
+            ClockModule {}
         }
 
-        // RIGHT PILLS
-        // 5. Backlight, Network, Audio, Updates
+        // CENTER CLUSTER: Dynamic Media Player or Taskbar
+        IslandPill {
+            MediaModule {
+                id: mediaModule
+            }
+
+            TaskbarModule {
+                visible: !mediaModule.hasMedia
+            }
+        }
+
+        // RIGHT CLUSTER: Hardware Audio, Backlight, Quick Settings & Battery
+        IslandPill {
+            AudioModule {}
+        }
+
         IslandPill {
             BacklightModule {}
-            NetworkModule {}
-            AudioModule {}
-            UpdatesModule {}
         }
 
-        // 6. System Tray & Battery
         IslandPill {
-            TrayModule {}
             BatteryModule {}
         }
 
-        // 7. Actions & Pin Toggle
         IslandPill {
-            ActionsModule {}
+            QuickSettingsModule {}
+        }
 
-            // Pin / Unpin Island Toggle
+        IslandPill {
+            visible: trayMod.implicitWidth > 0
+            TrayModule {
+                id: trayMod
+            }
+        }
+
+        // PIN TOGGLE
+        IslandPill {
             IslandButton {
                 icon: Config.isPinned ? "󰐃" : "󰤱"
                 tooltip: Config.isPinned ? "Unpin Dynamic Island" : "Pin Dynamic Island open"
@@ -118,19 +125,17 @@ Rectangle {
         }
     }
 
-    // Island MouseArea for Hover Detection
-    MouseArea {
-        id: islandHoverArea
-        anchors.fill: parent
-        hoverEnabled: true
-        acceptedButtons: Qt.NoButton // Allows child buttons to receive clicks
-        propagateComposedEvents: true
-
-        onEntered: {
-            Config.isHovered = true;
+    // Modern pointer handlers: Never block child button clicks
+    HoverHandler {
+        onHoveredChanged: {
+            Config.isHovered = hovered;
         }
-        onExited: {
-            Config.isHovered = false;
+    }
+
+    TapHandler {
+        enabled: !root.isExpanded
+        onTapped: {
+            Config.manualExpand = !Config.manualExpand;
         }
     }
 }

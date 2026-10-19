@@ -52,11 +52,11 @@ Item {
         tooltip: "Brightness: " + root.brightnessPct + "% (Scroll to adjust)"
 
         onScrolledUp: {
-            Hyprland.dispatch("exec hyde-shell brightnesscontrol i 5");
+            Config.run("brightnessctl set +5%");
             refreshTimer.start();
         }
         onScrolledDown: {
-            Hyprland.dispatch("exec hyde-shell brightnesscontrol d 5");
+            Config.run("brightnessctl set 5%-");
             refreshTimer.start();
         }
     }

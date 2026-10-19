@@ -1,7 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Hyprland
 import "../components"
 import ".."
 
@@ -21,7 +19,7 @@ Item {
             icon: ""
             tooltip: "Keybinds Hint"
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell keybinds_hint");
+                Config.run("hyde-shell keybinds_hint");
             }
         }
 
@@ -30,13 +28,13 @@ Item {
             icon: "󰋩"
             tooltip: "Wallpaper (Left: Next, Right: Prev, Middle: Select)"
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell app -t scope -- wallpaper.sh --next --global");
+                Config.run("hyde-shell app -t scope -- wallpaper.sh --next --global");
             }
             onRightClicked: {
-                Hyprland.dispatch("exec hyde-shell app -t scope -- wallpaper.sh --previous --global");
+                Config.run("hyde-shell app -t scope -- wallpaper.sh --previous --global");
             }
             onMiddleClicked: {
-                Hyprland.dispatch("exec hyde-shell app -t scope -- wallpaper.sh --select --global");
+                Config.run("hyde-shell app -t scope -- wallpaper.sh --select --global");
             }
         }
 
@@ -45,13 +43,13 @@ Item {
             icon: ""
             tooltip: "Theme Switcher (Left: Next, Right: Prev, Middle: Select)"
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell app -t scope -- theme.switch.sh -n");
+                Config.run("hyde-shell app -t scope -- theme.switch.sh -n");
             }
             onRightClicked: {
-                Hyprland.dispatch("exec hyde-shell app -t scope -- theme.switch.sh -p");
+                Config.run("hyde-shell app -t scope -- theme.switch.sh -p");
             }
             onMiddleClicked: {
-                Hyprland.dispatch("exec sleep 0.1 && hyde-shell app -t scope -- theme.select.sh");
+                Config.run("sleep 0.1 && hyde-shell app -t scope -- theme.select.sh");
             }
         }
 
@@ -60,13 +58,13 @@ Item {
             icon: ""
             tooltip: "Bar / Dock (Left: Next, Right: Prev, Middle: Quickapps)"
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell waybar -n");
+                Config.run("hyde-shell waybar -n");
             }
             onRightClicked: {
-                Hyprland.dispatch("exec hyde-shell waybar -p");
+                Config.run("hyde-shell waybar -p");
             }
             onMiddleClicked: {
-                Hyprland.dispatch("exec hyde-shell quickapps");
+                Config.run("hyde-shell quickapps");
             }
         }
 
@@ -75,7 +73,7 @@ Item {
             icon: ""
             tooltip: "Clipboard History"
             onClicked: {
-                Hyprland.dispatch("exec sleep 0.1 && hyde-shell cliphist -c");
+                Config.run("sleep 0.1 && hyde-shell cliphist -c");
             }
         }
 
@@ -84,7 +82,7 @@ Item {
             icon: ""
             tooltip: "HyDE Menu"
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell logoutlaunch 1");
+                Config.run("hyde-shell logoutlaunch 1");
             }
         }
 
@@ -95,7 +93,7 @@ Item {
             textColor: Config.danger
             hoverBgColor: Config.danger
             onClicked: {
-                Hyprland.dispatch("exec hyde-shell logoutlaunch 1");
+                Config.run("hyde-shell logoutlaunch 1");
             }
         }
     }

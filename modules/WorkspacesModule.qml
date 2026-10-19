@@ -81,18 +81,12 @@ Item {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    acceptedButtons: Qt.LeftButton
-
                     onClicked: {
-                        Hyprland.dispatch("workspace " + wsBtn.modelData);
+                        HyprlandLua.focusWorkspace(wsBtn.modelData);
                     }
 
                     onWheel: (wheel) => {
-                        if (wheel.angleDelta.y > 0) {
-                            Hyprland.dispatch("workspace e-1");
-                        } else if (wheel.angleDelta.y < 0) {
-                            Hyprland.dispatch("workspace e+1");
-                        }
+                        HyprlandLua.cycleWorkspace(wheel.angleDelta.y < 0);
                     }
                 }
             }
