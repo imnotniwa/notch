@@ -89,11 +89,11 @@ Item {
         // Power Menu
         IslandButton {
             icon: ""
-            tooltip: "Logout / Power Menu"
+            tooltip: "Power Menu (wlogout)"
             textColor: Config.danger
             hoverBgColor: Config.danger
             onClicked: {
-                Config.run("hyde-shell logoutlaunch 1");
+                Config.run("wlogout || hyde-shell logoutlaunch 1");
             }
         }
     }
