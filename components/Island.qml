@@ -7,14 +7,12 @@ Rectangle {
     id: root
 
     // Sizing animates smoothly between compact and expanded
-    property bool isExpanded: Config.expanded
-
-    implicitWidth: isExpanded ? Math.max(expandedRow.implicitWidth + 36, 760) : (compactView.implicitWidth + 32)
-    implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
+    implicitWidth: Math.max(expandedRow.implicitWidth + 36, 760)
+    implicitHeight: Config.expandedHeight
 
     // Smooth hanging notch corners: bottom corners rounded, top flush with screen edge
-    bottomLeftRadius: isExpanded ? 22 : Config.pillRadius
-    bottomRightRadius: isExpanded ? 22 : Config.pillRadius
+    bottomLeftRadius: 22
+    bottomRightRadius: 22
     topLeftRadius: 0
     topRightRadius: 0
 
@@ -33,53 +31,11 @@ Rectangle {
         }
     }
 
-    // Apple fluid spring morphing (WWDC 2018: Designing Fluid Interfaces)
-    Behavior on implicitWidth {
-        NumberAnimation {
-            duration: Config.springDuration
-            easing.type: Easing.OutBack
-            easing.overshoot: 1.08
-        }
-    }
-
-    Behavior on implicitHeight {
-        NumberAnimation {
-            duration: Config.animDuration
-            easing.type: Easing.OutCubic
-        }
-    }
-
-    // Compact View (visible when resting with coordinated scale & cross-fade)
-    CompactIsland {
-        id: compactView
-        anchors.centerIn: parent
-        visible: opacity > 0.02
-        opacity: root.isExpanded ? 0 : 1
-        scale: root.isExpanded ? 0.92 : 1.0
-
-        Behavior on opacity {
-            NumberAnimation { duration: 160 }
-        }
-        Behavior on scale {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-        }
-    }
-
-    // Expanded View (Recommendation A: Media & Quick Settings Deck)
+    // Deck View: Media & System Controls Deck
     RowLayout {
         id: expandedRow
         anchors.centerIn: parent
-        visible: opacity > 0.02
-        opacity: root.isExpanded ? 1 : 0
-        scale: root.isExpanded ? 1.0 : 0.94
         spacing: 8
-
-        Behavior on opacity {
-            NumberAnimation { duration: 200 }
-        }
-        Behavior on scale {
-            NumberAnimation { duration: 260; easing.type: Easing.OutBack; easing.overshoot: 1.06 }
-        }
 
         // LEFT CLUSTER: System Monitors, Workspaces & Clock
         IslandPill {
@@ -162,13 +118,6 @@ Rectangle {
             } else {
                 exitHysteresisTimer.restart();
             }
-        }
-    }
-
-    TapHandler {
-        enabled: !root.isExpanded
-        onTapped: {
-            Config.manualExpand = !Config.manualExpand;
         }
     }
 }

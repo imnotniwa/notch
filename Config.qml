@@ -51,7 +51,7 @@ Item {
     // Auto-hide hanging notch state: visible if hovered, pinned, manualExpand, or power modal open
     property bool notchHovered: false
     readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible
-    readonly property bool expanded: isPinned || (isHovered && notchVisible) || manualExpand
+    readonly property bool expanded: notchVisible
 
     // Plug-and-Play Module Declarations
     property var compactModules: ["workspace", "window", "battery", "volume", "clock"]
