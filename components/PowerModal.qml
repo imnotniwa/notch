@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Widgets
 import "../core"
 import ".."
 
@@ -106,11 +107,30 @@ Item {
                     Item { Layout.fillWidth: true }
 
                     // Close Button
-                    IslandButton {
-                        icon: "󰅖"
-                        tooltip: "Close"
-                        onClicked: {
-                            Config.powerModalVisible = false;
+                    Rectangle {
+                        implicitWidth: 26
+                        implicitHeight: 26
+                        radius: 13
+                        color: closeMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.07)
+                        border.color: Qt.rgba(1, 1, 1, 0.08)
+                        border.width: 1
+
+                        IconImage {
+                            anchors.centerIn: parent
+                            source: "../assets/icons/close.svg"
+                            implicitWidth: 12
+                            implicitHeight: 12
+                            color: closeMouse.containsMouse ? Config.hvrFg : Config.mainFg
+                        }
+
+                        MouseArea {
+                            id: closeMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                Config.powerModalVisible = false;
+                            }
                         }
                     }
                 }
@@ -130,7 +150,7 @@ Item {
                     Rectangle {
                         id: lockBtnCard
                         Layout.fillWidth: true
-                        height: 48
+                        height: 50
                         radius: 12
                         scale: lockMouse.pressed ? 0.97 : 1.0
                         transformOrigin: Item.Center
@@ -141,17 +161,24 @@ Item {
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
-                            spacing: 12
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
+                            spacing: 14
 
-                            Text {
-                                text: "󰌾"
-                                color: Config.actFg
-                                font.family: Config.fontFamily
-                                font.pixelSize: 17
+                            Item {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
+
+                                IconImage {
+                                    anchors.centerIn: parent
+                                    source: "../assets/icons/lock.svg"
+                                    implicitWidth: 18
+                                    implicitHeight: 18
+                                    color: Config.actFg
+                                }
                             }
+
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
@@ -188,7 +215,7 @@ Item {
                     Rectangle {
                         id: sleepBtnCard
                         Layout.fillWidth: true
-                        height: 48
+                        height: 50
                         radius: 12
                         scale: sleepMouse.pressed ? 0.97 : 1.0
                         transformOrigin: Item.Center
@@ -199,17 +226,24 @@ Item {
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
-                            spacing: 12
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
+                            spacing: 14
 
-                            Text {
-                                text: "󰒲"
-                                color: Config.actFg
-                                font.family: Config.fontFamily
-                                font.pixelSize: 17
+                            Item {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
+
+                                IconImage {
+                                    anchors.centerIn: parent
+                                    source: "../assets/icons/sleep.svg"
+                                    implicitWidth: 18
+                                    implicitHeight: 18
+                                    color: Config.actFg
+                                }
                             }
+
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
@@ -246,7 +280,7 @@ Item {
                     Rectangle {
                         id: logoutBtnCard
                         Layout.fillWidth: true
-                        height: 48
+                        height: 50
                         radius: 12
                         scale: logoutMouse.pressed ? 0.97 : 1.0
                         transformOrigin: Item.Center
@@ -257,17 +291,24 @@ Item {
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
-                            spacing: 12
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
+                            spacing: 14
 
-                            Text {
-                                text: "󰗽"
-                                color: Config.actFg
-                                font.family: Config.fontFamily
-                                font.pixelSize: 17
+                            Item {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
+
+                                IconImage {
+                                    anchors.centerIn: parent
+                                    source: "../assets/icons/logout.svg"
+                                    implicitWidth: 18
+                                    implicitHeight: 18
+                                    color: Config.actFg
+                                }
                             }
+
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
@@ -303,7 +344,7 @@ Item {
                     Rectangle {
                         id: rebootBtnCard
                         Layout.fillWidth: true
-                        height: 48
+                        height: 50
                         radius: 12
                         scale: rebootMouse.pressed ? 0.97 : 1.0
                         transformOrigin: Item.Center
@@ -314,17 +355,24 @@ Item {
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
-                            spacing: 12
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
+                            spacing: 14
 
-                            Text {
-                                text: "󰜉"
-                                color: Config.warning
-                                font.family: Config.fontFamily
-                                font.pixelSize: 17
+                            Item {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
+
+                                IconImage {
+                                    anchors.centerIn: parent
+                                    source: "../assets/icons/restart.svg"
+                                    implicitWidth: 18
+                                    implicitHeight: 18
+                                    color: Config.warning
+                                }
                             }
+
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
@@ -360,7 +408,7 @@ Item {
                     Rectangle {
                         id: shutdownBtnCard
                         Layout.fillWidth: true
-                        height: 48
+                        height: 50
                         radius: 12
                         scale: shutdownMouse.pressed ? 0.97 : 1.0
                         transformOrigin: Item.Center
@@ -371,17 +419,24 @@ Item {
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 14
-                            anchors.rightMargin: 14
-                            spacing: 12
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 16
+                            spacing: 14
 
-                            Text {
-                                text: ""
-                                color: Config.danger
-                                font.family: Config.fontFamily
-                                font.pixelSize: 17
+                            Item {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
+
+                                IconImage {
+                                    anchors.centerIn: parent
+                                    source: "../assets/icons/power.svg"
+                                    implicitWidth: 18
+                                    implicitHeight: 18
+                                    color: Config.danger
+                                }
                             }
+
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
@@ -424,17 +479,17 @@ Item {
                 // Big Warning / Action Icon
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
-                    width: 52
-                    height: 52
-                    radius: 26
+                    width: 54
+                    height: 54
+                    radius: 27
                     color: root.viewState === "confirm_shutdown" ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.2) : (root.viewState === "confirm_reboot" ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.2) : Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.2))
 
-                    Text {
+                    IconImage {
                         anchors.centerIn: parent
-                        text: root.viewState === "confirm_shutdown" ? "" : (root.viewState === "confirm_reboot" ? "󰜉" : "󰗽")
+                        source: root.viewState === "confirm_shutdown" ? "../assets/icons/power.svg" : (root.viewState === "confirm_reboot" ? "../assets/icons/restart.svg" : "../assets/icons/logout.svg")
+                        implicitWidth: 24
+                        implicitHeight: 24
                         color: root.viewState === "confirm_shutdown" ? Config.danger : (root.viewState === "confirm_reboot" ? Config.warning : Config.actFg)
-                        font.family: Config.fontFamily
-                        font.pixelSize: 22
                     }
                 }
 
