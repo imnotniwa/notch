@@ -4,6 +4,7 @@ import "components"
 import "."
 
 ShellRoot {
+    // Top Bar Window per screen
     Variants {
         model: Quickshell.screens
         delegate: Component {
@@ -36,6 +37,30 @@ ShellRoot {
                     anchors.topMargin: 4
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
+            }
+        }
+    }
+
+    // Centered Modal Window per screen (mapped when powerModalVisible is true)
+    Variants {
+        model: Quickshell.screens
+        delegate: Component {
+            PanelWindow {
+                id: modalWindow
+                required property var modelData
+                screen: modelData
+                visible: Config.powerModalVisible
+
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
+
+                color: "transparent"
+
+                PowerModal {}
             }
         }
     }

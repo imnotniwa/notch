@@ -41,6 +41,7 @@ Item {
     property bool isPinned: false
     property bool isHovered: false
     property bool manualExpand: false
+    property bool powerModalVisible: false
 
     readonly property bool expanded: isPinned || isHovered || manualExpand
 
