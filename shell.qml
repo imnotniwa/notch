@@ -4,9 +4,9 @@ import "components"
 import "."
 
 ShellRoot {
-    // Top Bar Window per screen
+    // Single Top Bar Window on Primary Screen
     Variants {
-        model: Quickshell.screens
+        model: Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : []
         delegate: Component {
             PanelWindow {
                 id: barWindow
@@ -19,7 +19,7 @@ ShellRoot {
                     right: true
                 }
 
-                // Window height provides space for hanging and expanded island
+                // Window height provides space for hanging island
                 implicitHeight: Config.expandedHeight + 14
                 color: "transparent"
 
@@ -33,12 +33,12 @@ ShellRoot {
                     item: Config.notchVisible ? island : topTrigger
                 }
 
-                // Top Edge Hotspot: catches mouse hovering at the top-center bezel
+                // Top Edge Hotspot: catches mouse hovering strictly within notch's width at top bezel
                 Item {
                     id: topTrigger
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
-                    width: Math.max(island.implicitWidth, 380)
+                    width: island.implicitWidth
                     height: 4
 
                     HoverHandler {

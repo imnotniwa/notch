@@ -98,10 +98,10 @@ Rectangle {
         }
     }
 
-    // Graceful hover hysteresis timer to prevent flicker near edges
+    // Graceful hover hysteresis timer to tuck away when cursor leaves notch area
     Timer {
         id: exitHysteresisTimer
-        interval: 220
+        interval: 120
         onTriggered: {
             Config.isHovered = false;
             Config.notchHovered = false;

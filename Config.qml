@@ -8,9 +8,7 @@ Item {
     readonly property int fontSize: 10
     readonly property int iconSize: 13
     
-    readonly property int compactHeight: 32
     readonly property int expandedHeight: 50
-    readonly property int compactWidth: 440
     readonly property int pillRadius: 16
     readonly property int innerPillRadius: 11
 
@@ -48,13 +46,12 @@ Item {
     property bool manualExpand: false
     property bool powerModalVisible: false
 
-    // Auto-hide hanging notch state: visible if hovered, pinned, manualExpand, or power modal open
+    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, or power modal open
     property bool notchHovered: false
     readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible
     readonly property bool expanded: notchVisible
 
     // Plug-and-Play Module Declarations
-    property var compactModules: ["workspace", "window", "battery", "volume", "clock"]
     property var expandedLeft: ["sysmon", "workspaces"]
     property var expandedCenter: ["media", "taskbar"]
     property var expandedRight: ["audio", "backlight", "quicksettings", "battery"]
