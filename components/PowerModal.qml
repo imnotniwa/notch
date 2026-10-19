@@ -115,9 +115,9 @@ Item {
                         border.color: Qt.rgba(1, 1, 1, 0.08)
                         border.width: 1
 
-                        IconImage {
+                        SvgIcon {
                             anchors.centerIn: parent
-                            source: "../assets/icons/close.svg"
+                            name: "close"
                             implicitWidth: 12
                             implicitHeight: 12
                             color: closeMouse.containsMouse ? Config.hvrFg : Config.mainFg
@@ -170,9 +170,9 @@ Item {
                                 Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
 
-                                IconImage {
+                                SvgIcon {
                                     anchors.centerIn: parent
-                                    source: "../assets/icons/lock.svg"
+                                    name: "lock"
                                     implicitWidth: 18
                                     implicitHeight: 18
                                     color: Config.actFg
@@ -235,9 +235,9 @@ Item {
                                 Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
 
-                                IconImage {
+                                SvgIcon {
                                     anchors.centerIn: parent
-                                    source: "../assets/icons/sleep.svg"
+                                    name: "sleep"
                                     implicitWidth: 18
                                     implicitHeight: 18
                                     color: Config.actFg
@@ -300,9 +300,9 @@ Item {
                                 Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
 
-                                IconImage {
+                                SvgIcon {
                                     anchors.centerIn: parent
-                                    source: "../assets/icons/logout.svg"
+                                    name: "logout"
                                     implicitWidth: 18
                                     implicitHeight: 18
                                     color: Config.actFg
@@ -364,9 +364,9 @@ Item {
                                 Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
 
-                                IconImage {
+                                SvgIcon {
                                     anchors.centerIn: parent
-                                    source: "../assets/icons/restart.svg"
+                                    name: "restart"
                                     implicitWidth: 18
                                     implicitHeight: 18
                                     color: Config.warning
@@ -428,9 +428,9 @@ Item {
                                 Layout.preferredHeight: 20
                                 Layout.alignment: Qt.AlignVCenter
 
-                                IconImage {
+                                SvgIcon {
                                     anchors.centerIn: parent
-                                    source: "../assets/icons/power.svg"
+                                    name: "power"
                                     implicitWidth: 18
                                     implicitHeight: 18
                                     color: Config.danger
@@ -484,11 +484,12 @@ Item {
                     radius: 27
                     color: root.viewState === "confirm_shutdown" ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.2) : (root.viewState === "confirm_reboot" ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.2) : Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.2))
 
-                    IconImage {
+                    SvgIcon {
                         anchors.centerIn: parent
-                        source: root.viewState === "confirm_shutdown" ? "../assets/icons/power.svg" : (root.viewState === "confirm_reboot" ? "../assets/icons/restart.svg" : "../assets/icons/logout.svg")
+                        name: root.viewState === "confirm_shutdown" ? "power" : (root.viewState === "confirm_reboot" ? "restart" : "logout")
                         implicitWidth: 24
                         implicitHeight: 24
+                        strokeWidth: 2.2
                         color: root.viewState === "confirm_shutdown" ? Config.danger : (root.viewState === "confirm_reboot" ? Config.warning : Config.actFg)
                     }
                 }
