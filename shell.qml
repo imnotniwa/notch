@@ -4,9 +4,9 @@ import "components"
 import "."
 
 ShellRoot {
-    // Single Top Bar Window on Primary Screen
+    // Top Bar Window per screen: notch shows on whichever screen the cursor hovers at top
     Variants {
-        model: Quickshell.screens.length > 0 ? [Quickshell.screens[0]] : []
+        model: Quickshell.screens
         delegate: Component {
             PanelWindow {
                 id: barWindow
@@ -27,7 +27,7 @@ ShellRoot {
                 exclusiveZone: 0
 
                 // Click-through mask:
-                // When notch is hidden, only the 3px top trigger hotspot is masked.
+                // When notch is hidden, only the top trigger hotspot is masked.
                 // When notch is visible, the entire island receives pointer input.
                 mask: Region {
                     item: Config.notchVisible ? island : topTrigger
@@ -39,7 +39,7 @@ ShellRoot {
                     anchors.top: parent.top
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: island.implicitWidth
-                    height: 4
+                    height: 8
 
                     HoverHandler {
                         onHoveredChanged: {
