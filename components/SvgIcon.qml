@@ -23,18 +23,22 @@ Item {
         layer.smooth: true
 
         // --- LOCK ICON ---
-        // Lock body
+        // Lock body (rounded rectangle)
         ShapePath {
             strokeColor: root.name === "lock" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 4; startY: 11
-            PathLine { x: 20; y: 11 }
-            PathLine { x: 20; y: 21 }
-            PathLine { x: 4; y: 21 }
-            PathLine { x: 4; y: 11 }
+            startX: 6; startY: 11
+            PathLine { x: 18; y: 11 }
+            PathArc { x: 20; y: 13; radiusX: 2; radiusY: 2 }
+            PathLine { x: 20; y: 19 }
+            PathArc { x: 18; y: 21; radiusX: 2; radiusY: 2 }
+            PathLine { x: 6; y: 21 }
+            PathArc { x: 4; y: 19; radiusX: 2; radiusY: 2 }
+            PathLine { x: 4; y: 13 }
+            PathArc { x: 6; y: 11; radiusX: 2; radiusY: 2 }
         }
         // Lock shackle
         ShapePath {
@@ -43,10 +47,10 @@ Item {
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 7; startY: 11
-            PathLine { x: 7; y: 7 }
-            PathArc { x: 17; y: 7; radiusX: 5; radiusY: 5 }
-            PathLine { x: 17; y: 11 }
+            startX: 7.5; startY: 11
+            PathLine { x: 7.5; y: 7.5 }
+            PathArc { x: 16.5; y: 7.5; radiusX: 4.5; radiusY: 4.5; direction: PathArc.Clockwise }
+            PathLine { x: 16.5; y: 11 }
         }
 
         // --- SLEEP / MOON ICON ---
@@ -56,26 +60,28 @@ Item {
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            // Crescent moon contour
-            startX: 20; startY: 13
-            PathArc { x: 11; y: 4; radiusX: 9; radiusY: 9; direction: PathArc.Counterclockwise }
-            PathArc { x: 20; y: 13; radiusX: 7; radiusY: 7; direction: PathArc.Clockwise }
+            // Crisp centered crescent moon
+            startX: 17; startY: 17.5
+            PathArc { x: 10.5; y: 4.5; radiusX: 8.5; radiusY: 8.5; direction: PathArc.Clockwise }
+            PathArc { x: 17; y: 17.5; radiusX: 6.8; radiusY: 6.8; direction: PathArc.Counterclockwise }
         }
 
         // --- LOGOUT / EXIT ICON ---
-        // Door bracket
+        // Left door bracket
         ShapePath {
             strokeColor: root.name === "logout" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 10; startY: 20
-            PathLine { x: 4; y: 20 }
-            PathLine { x: 4; y: 4 }
-            PathLine { x: 10; y: 4 }
+            startX: 11; startY: 20
+            PathLine { x: 5; y: 20 }
+            PathArc { x: 4; y: 19; radiusX: 1; radiusY: 1 }
+            PathLine { x: 4; y: 5 }
+            PathArc { x: 5; y: 4; radiusX: 1; radiusY: 1 }
+            PathLine { x: 11; y: 4 }
         }
-        // Exit arrow stem
+        // Arrow horizontal stem
         ShapePath {
             strokeColor: root.name === "logout" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
@@ -83,32 +89,33 @@ Item {
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
             startX: 9; startY: 12
-            PathLine { x: 20; y: 12 }
+            PathLine { x: 19.5; y: 12 }
         }
-        // Exit arrow head
+        // Arrow chevron head
         ShapePath {
             strokeColor: root.name === "logout" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 15; startY: 7
-            PathLine { x: 20; y: 12 }
-            PathLine { x: 15; y: 17 }
+            startX: 15; startY: 7.5
+            PathLine { x: 19.5; y: 12 }
+            PathLine { x: 15; y: 16.5 }
         }
 
         // --- RESTART / REBOOT ICON ---
-        // Circular arc
+        // 3/4 circular track
         ShapePath {
             strokeColor: root.name === "restart" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 20; startY: 10
+            startX: 18.5; startY: 9
             PathArc { x: 12; y: 20; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
-            PathArc { x: 5; y: 12; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
-            PathArc { x: 10; y: 5; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathArc { x: 4; y: 12; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathArc { x: 12; y: 4; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathLine { x: 18; y: 4 }
         }
         // Restart arrow head
         ShapePath {
@@ -117,13 +124,13 @@ Item {
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 20; startY: 4
-            PathLine { x: 20; y: 10 }
-            PathLine { x: 14; y: 10 }
+            startX: 14; startY: 8.5
+            PathLine { x: 18.5; y: 4 }
+            PathLine { x: 14; y: 0.5 }
         }
 
         // --- POWER / SHUTDOWN ICON ---
-        // Power vertical line
+        // Power vertical switch
         ShapePath {
             strokeColor: root.name === "power" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
@@ -133,19 +140,19 @@ Item {
             startX: 12; startY: 3
             PathLine { x: 12; y: 11 }
         }
-        // Power open circle arc
+        // Power circular halo
         ShapePath {
             strokeColor: root.name === "power" ? root.color : "transparent"
             strokeWidth: root.strokeWidth
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
             joinStyle: ShapePath.RoundJoin
-            startX: 17.5; startY: 6.5
+            startX: 17.2; startY: 6.8
             PathArc { x: 12; y: 21; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
-            PathArc { x: 6.5; y: 6.5; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
+            PathArc { x: 6.8; y: 6.8; radiusX: 8; radiusY: 8; direction: PathArc.Clockwise }
         }
 
-        // --- CLOSE / CANCEL ICON ---
+        // --- CLOSE ICON ---
         ShapePath {
             strokeColor: root.name === "close" ? root.color : "transparent"
             strokeWidth: root.strokeWidth

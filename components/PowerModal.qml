@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell.Widgets
 import "../core"
 import ".."
 
@@ -28,9 +27,9 @@ Item {
             target: modalCard
             property: "scale"
             to: 1.0
-            duration: 220
+            duration: 240
             easing.type: Easing.OutBack
-            easing.overshoot: 1.15
+            easing.overshoot: 1.08
         }
         NumberAnimation {
             target: modalCard
@@ -41,7 +40,7 @@ Item {
         }
     }
 
-    // Dimmed Backdrop: Clicking outside closes modal
+    // Fullscreen Dimmed Backdrop (Apple Scrim)
     Rectangle {
         anchors.fill: parent
         color: "#80000000"
@@ -58,8 +57,8 @@ Item {
     Rectangle {
         id: modalCard
         anchors.centerIn: parent
-        width: 380
-        implicitHeight: contentColumn.implicitHeight + 48
+        width: 360
+        implicitHeight: contentColumn.implicitHeight + 44
         radius: 20
         color: Config.islandBg
         border.color: Config.islandBorder
@@ -74,10 +73,12 @@ Item {
         ColumnLayout {
             id: contentColumn
             anchors.centerIn: parent
-            width: parent.width - 48
+            width: parent.width - 44
             spacing: 16
 
+            // ==========================================
             // 1. MAIN MENU VIEW
+            // ==========================================
             ColumnLayout {
                 visible: root.viewState === "menu"
                 Layout.fillWidth: true
@@ -88,12 +89,12 @@ Item {
                     Layout.fillWidth: true
 
                     ColumnLayout {
-                        spacing: 3
+                        spacing: 2
                         Text {
                             text: "Power Options"
                             color: Config.mainFg
                             font.family: Config.fontFamily
-                            font.pixelSize: 14
+                            font.pixelSize: 13
                             font.bold: true
                         }
                         Text {
@@ -106,13 +107,13 @@ Item {
 
                     Item { Layout.fillWidth: true }
 
-                    // Close Button
+                    // Close Button (Apple circular dismiss)
                     Rectangle {
                         implicitWidth: 26
                         implicitHeight: 26
                         radius: 13
-                        color: closeMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Qt.rgba(1, 1, 1, 0.07)
-                        border.color: Qt.rgba(1, 1, 1, 0.08)
+                        color: closeMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : Qt.rgba(1, 1, 1, 0.08)
+                        border.color: Qt.rgba(1, 1, 1, 0.10)
                         border.width: 1
 
                         SvgIcon {
@@ -120,6 +121,7 @@ Item {
                             name: "close"
                             implicitWidth: 12
                             implicitHeight: 12
+                            strokeWidth: 2.2
                             color: closeMouse.containsMouse ? Config.hvrFg : Config.mainFg
                         }
 
@@ -146,43 +148,46 @@ Item {
                     Layout.fillWidth: true
                     spacing: 8
 
-                    // Lock Button
+                    // 1. Lock Screen
                     Rectangle {
                         id: lockBtnCard
                         Layout.fillWidth: true
-                        height: 50
+                        height: 52
                         radius: 12
-                        scale: lockMouse.pressed ? 0.97 : 1.0
+                        scale: lockMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
                         color: lockMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.22) : Config.subPillBg
-                        border.color: lockMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.4) : Config.subPillBorder
+                        border.color: lockMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.40) : Config.subPillBorder
                         border.width: 1
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 14
 
+                            // Left fixed icon slot
                             Item {
-                                Layout.preferredWidth: 20
-                                Layout.preferredHeight: 20
-                                Layout.alignment: Qt.AlignVCenter
+                                width: 22
+                                height: 22
+                                anchors.verticalCenter: parent.verticalCenter
 
                                 SvgIcon {
                                     anchors.centerIn: parent
                                     name: "lock"
                                     implicitWidth: 18
                                     implicitHeight: 18
+                                    strokeWidth: 2.0
                                     color: Config.actFg
                                 }
                             }
 
-                            ColumnLayout {
+                            // Left-anchored text column
+                            Column {
                                 spacing: 2
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
+                                anchors.verticalCenter: parent.verticalCenter
+
                                 Text {
                                     text: "Lock Screen"
                                     color: Config.mainFg
@@ -211,43 +216,46 @@ Item {
                         }
                     }
 
-                    // Sleep / Suspend Button
+                    // 2. Sleep / Suspend
                     Rectangle {
                         id: sleepBtnCard
                         Layout.fillWidth: true
-                        height: 50
+                        height: 52
                         radius: 12
-                        scale: sleepMouse.pressed ? 0.97 : 1.0
+                        scale: sleepMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
                         color: sleepMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.22) : Config.subPillBg
-                        border.color: sleepMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.4) : Config.subPillBorder
+                        border.color: sleepMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.40) : Config.subPillBorder
                         border.width: 1
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 14
 
+                            // Left fixed icon slot
                             Item {
-                                Layout.preferredWidth: 20
-                                Layout.preferredHeight: 20
-                                Layout.alignment: Qt.AlignVCenter
+                                width: 22
+                                height: 22
+                                anchors.verticalCenter: parent.verticalCenter
 
                                 SvgIcon {
                                     anchors.centerIn: parent
                                     name: "sleep"
                                     implicitWidth: 18
                                     implicitHeight: 18
+                                    strokeWidth: 2.0
                                     color: Config.actFg
                                 }
                             }
 
-                            ColumnLayout {
+                            // Left-anchored text column
+                            Column {
                                 spacing: 2
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
+                                anchors.verticalCenter: parent.verticalCenter
+
                                 Text {
                                     text: "Sleep"
                                     color: Config.mainFg
@@ -276,43 +284,46 @@ Item {
                         }
                     }
 
-                    // Logout Button
+                    // 3. Log Out
                     Rectangle {
                         id: logoutBtnCard
                         Layout.fillWidth: true
-                        height: 50
+                        height: 52
                         radius: 12
-                        scale: logoutMouse.pressed ? 0.97 : 1.0
+                        scale: logoutMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
                         color: logoutMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.22) : Config.subPillBg
-                        border.color: logoutMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.4) : Config.subPillBorder
+                        border.color: logoutMouse.containsMouse ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.40) : Config.subPillBorder
                         border.width: 1
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 14
 
+                            // Left fixed icon slot
                             Item {
-                                Layout.preferredWidth: 20
-                                Layout.preferredHeight: 20
-                                Layout.alignment: Qt.AlignVCenter
+                                width: 22
+                                height: 22
+                                anchors.verticalCenter: parent.verticalCenter
 
                                 SvgIcon {
                                     anchors.centerIn: parent
                                     name: "logout"
                                     implicitWidth: 18
                                     implicitHeight: 18
+                                    strokeWidth: 2.0
                                     color: Config.actFg
                                 }
                             }
 
-                            ColumnLayout {
+                            // Left-anchored text column
+                            Column {
                                 spacing: 2
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
+                                anchors.verticalCenter: parent.verticalCenter
+
                                 Text {
                                     text: "Log Out"
                                     color: Config.mainFg
@@ -340,43 +351,46 @@ Item {
                         }
                     }
 
-                    // Reboot Button
+                    // 4. Restart
                     Rectangle {
                         id: rebootBtnCard
                         Layout.fillWidth: true
-                        height: 50
+                        height: 52
                         radius: 12
-                        scale: rebootMouse.pressed ? 0.97 : 1.0
+                        scale: rebootMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
                         color: rebootMouse.containsMouse ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.22) : Config.subPillBg
-                        border.color: rebootMouse.containsMouse ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.4) : Config.subPillBorder
+                        border.color: rebootMouse.containsMouse ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.40) : Config.subPillBorder
                         border.width: 1
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 14
 
+                            // Left fixed icon slot
                             Item {
-                                Layout.preferredWidth: 20
-                                Layout.preferredHeight: 20
-                                Layout.alignment: Qt.AlignVCenter
+                                width: 22
+                                height: 22
+                                anchors.verticalCenter: parent.verticalCenter
 
                                 SvgIcon {
                                     anchors.centerIn: parent
                                     name: "restart"
                                     implicitWidth: 18
                                     implicitHeight: 18
+                                    strokeWidth: 2.0
                                     color: Config.warning
                                 }
                             }
 
-                            ColumnLayout {
+                            // Left-anchored text column
+                            Column {
                                 spacing: 2
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
+                                anchors.verticalCenter: parent.verticalCenter
+
                                 Text {
                                     text: "Restart"
                                     color: Config.mainFg
@@ -404,43 +418,46 @@ Item {
                         }
                     }
 
-                    // Shutdown Button
+                    // 5. Shut Down
                     Rectangle {
                         id: shutdownBtnCard
                         Layout.fillWidth: true
-                        height: 50
+                        height: 52
                         radius: 12
-                        scale: shutdownMouse.pressed ? 0.97 : 1.0
+                        scale: shutdownMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
                         color: shutdownMouse.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.22) : Config.subPillBg
-                        border.color: shutdownMouse.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.4) : Config.subPillBorder
+                        border.color: shutdownMouse.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.40) : Config.subPillBorder
                         border.width: 1
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.leftMargin: 16
                             anchors.rightMargin: 16
                             spacing: 14
 
+                            // Left fixed icon slot
                             Item {
-                                Layout.preferredWidth: 20
-                                Layout.preferredHeight: 20
-                                Layout.alignment: Qt.AlignVCenter
+                                width: 22
+                                height: 22
+                                anchors.verticalCenter: parent.verticalCenter
 
                                 SvgIcon {
                                     anchors.centerIn: parent
                                     name: "power"
                                     implicitWidth: 18
                                     implicitHeight: 18
+                                    strokeWidth: 2.0
                                     color: Config.danger
                                 }
                             }
 
-                            ColumnLayout {
+                            // Left-anchored text column
+                            Column {
                                 spacing: 2
-                                Layout.fillWidth: true
-                                Layout.alignment: Qt.AlignVCenter
+                                anchors.verticalCenter: parent.verticalCenter
+
                                 Text {
                                     text: "Shut Down"
                                     color: Config.mainFg
@@ -470,25 +487,29 @@ Item {
                 }
             }
 
-            // 2. CONFIRMATION VIEW (Shutdown / Reboot / Logout)
+            // ==========================================
+            // 2. CONFIRMATION VIEW (Apple Safety & Agency)
+            // ==========================================
             ColumnLayout {
                 visible: root.viewState !== "menu"
                 Layout.fillWidth: true
                 spacing: 16
 
-                // Big Warning / Action Icon
+                // Centered Action Badge
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
-                    width: 54
-                    height: 54
-                    radius: 27
-                    color: root.viewState === "confirm_shutdown" ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.2) : (root.viewState === "confirm_reboot" ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.2) : Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.2))
+                    width: 56
+                    height: 56
+                    radius: 28
+                    color: root.viewState === "confirm_shutdown" ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.20) : (root.viewState === "confirm_reboot" ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.20) : Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.20))
+                    border.color: root.viewState === "confirm_shutdown" ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.35) : (root.viewState === "confirm_reboot" ? Qt.rgba(Config.warning.r, Config.warning.g, Config.warning.b, 0.35) : Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.35))
+                    border.width: 1
 
                     SvgIcon {
                         anchors.centerIn: parent
                         name: root.viewState === "confirm_shutdown" ? "power" : (root.viewState === "confirm_reboot" ? "restart" : "logout")
-                        implicitWidth: 24
-                        implicitHeight: 24
+                        implicitWidth: 26
+                        implicitHeight: 26
                         strokeWidth: 2.2
                         color: root.viewState === "confirm_shutdown" ? Config.danger : (root.viewState === "confirm_reboot" ? Config.warning : Config.actFg)
                     }
@@ -517,22 +538,22 @@ Item {
                     }
                 }
 
-                // Confirmation Buttons
+                // Symmetrical Action Buttons
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 12
 
-                    // Cancel
+                    // Cancel Button
                     Rectangle {
                         id: cancelBtn
                         Layout.fillWidth: true
-                        height: 40
-                        radius: 10
+                        height: 42
+                        radius: 12
                         scale: cancelMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
-                        color: cancelMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : Config.subPillBg
-                        border.color: Config.subPillBorder
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
+                        color: cancelMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.14) : Config.subPillBg
+                        border.color: cancelMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.22) : Config.subPillBorder
                         border.width: 1
 
                         Text {
@@ -559,11 +580,11 @@ Item {
                     Rectangle {
                         id: confirmBtn
                         Layout.fillWidth: true
-                        height: 40
-                        radius: 10
+                        height: 42
+                        radius: 12
                         scale: confirmMouse.pressed ? 0.96 : 1.0
                         transformOrigin: Item.Center
-                        Behavior on scale { NumberAnimation { duration: 100 } }
+                        Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutQuad } }
                         color: root.viewState === "confirm_shutdown" ? Config.danger : (root.viewState === "confirm_reboot" ? Config.warning : Config.actBg)
 
                         Text {
