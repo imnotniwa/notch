@@ -52,8 +52,6 @@ ShellRoot {
 
                 Island {
                     id: island
-                    anchors.top: parent.top
-                    anchors.topMargin: 0
                     anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
