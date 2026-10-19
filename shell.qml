@@ -1,10 +1,14 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import "components"
 import "."
 
 ShellRoot {
-    // Top Bar Window per screen: notch shows on whichever screen the cursor hovers at top
+    // Dynamic focused monitor tracking: follows active workspace/monitor focus
+    readonly property string activeMonitorName: Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : (Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "")
+
+    // Top Bar Window per screen: strictly active only on the currently focused monitor
     Variants {
         model: Quickshell.screens
         delegate: Component {
@@ -12,6 +16,9 @@ ShellRoot {
                 id: barWindow
                 required property var modelData
                 screen: modelData
+
+                // Strictly visible only on the monitor that currently has focus!
+                visible: modelData.name === activeMonitorName
 
                 anchors {
                     top: true
