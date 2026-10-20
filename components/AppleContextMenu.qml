@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Hyprland
 import ".."
 
 PanelWindow {
@@ -13,23 +12,17 @@ PanelWindow {
 
     anchors {
         top: true
+        bottom: true
         left: true
-    }
-
-    margins {
-        top: Config.trayMenuY
-        left: Math.max(16, Math.min(Config.trayMenuX, (screen ? screen.width : 1920) - implicitWidth - 16))
+        right: true
     }
 
     color: "transparent"
-    implicitWidth: Math.max(190, menuCard.implicitWidth)
-    implicitHeight: menuCard.implicitHeight
 
-    HyprlandFocusGrab {
-        id: grab
-        windows: [ root ]
-        active: Config.trayMenuVisible
-        onCleared: {
+    // Fullscreen transparent backdrop: catches outside clicks reliably without focus-stealing or re-triggering hover animations
+    MouseArea {
+        anchors.fill: parent
+        onClicked: {
             Config.trayMenuVisible = false;
         }
     }
@@ -41,10 +34,17 @@ PanelWindow {
 
     Rectangle {
         id: menuCard
-        anchors.fill: parent
+        x: Math.max(16, Math.min(Config.trayMenuX, (screen ? screen.width : 1920) - width - 16))
+        y: Config.trayMenuY
+        width: Math.max(190, col.implicitWidth + 24)
         implicitHeight: col.implicitHeight + 14
-        implicitWidth: Math.max(190, col.implicitWidth + 24)
         radius: 14
+
+        // Prevent clicks on the menu card from triggering backdrop dismiss
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {}
+        }
 
         // Apple Dark Translucent Acrylic Material
         color: "#f018181b"
@@ -142,3 +142,4 @@ PanelWindow {
         }
     }
 }
+
