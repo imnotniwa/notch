@@ -25,6 +25,10 @@ ShellRoot {
                 readonly property string anchorEdge: Config.getAnchorForScreen(modelData, Quickshell.screens)
                 readonly property bool isBottomAnchor: anchorEdge === "bottom"
 
+                Component.onCompleted: {
+                    if (visible) Config.activeAnchorEdge = anchorEdge;
+                }
+
                 onVisibleChanged: {
                     if (visible) {
                         Config.activeAnchorEdge = anchorEdge;
@@ -65,13 +69,13 @@ ShellRoot {
                     height: island.height + 40
                 }
 
-                // Bezel Edge Hotspot: catches mouse hovering along the anchor bezel
+                // Bezel Edge Hotspot: catches mouse hovering along the anchor bezel centered with the island
                 Item {
                     id: edgeTrigger
                     anchors.top: barWindow.isBottomAnchor ? undefined : parent.top
                     anchors.bottom: barWindow.isBottomAnchor ? parent.bottom : undefined
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: island.implicitWidth
                     height: 8
 
                     HoverHandler {
