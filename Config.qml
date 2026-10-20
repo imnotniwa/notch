@@ -47,6 +47,7 @@ Item {
     property bool isHovered: false
     property bool manualExpand: false
     property bool powerModalVisible: false
+    property string activeAnchorEdge: "top"
 
     // Apple Context Menu State
     property var trayActiveMenu: null
@@ -58,6 +59,42 @@ Item {
     property bool notchHovered: false
     readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible
     readonly property bool expanded: notchVisible
+
+    // Notch Anchor Mode: "auto", "top", or "bottom"
+    // "auto": intelligently detects if another monitor is stacked above this monitor.
+    // If a monitor is underneath another (e.g. laptop below external), it anchors to "bottom" so the mouse transition across monitors isn't blocked.
+    property string notchAnchor: "auto"
+
+    function getAnchorForScreen(screen, allScreens) {
+        if (!screen) return "top";
+        if (notchAnchor === "top" || notchAnchor === "bottom") {
+            return notchAnchor;
+        }
+
+        // Automatic detection for stacked monitors
+        if (!allScreens || allScreens.length <= 1) return "top";
+
+        let curX = screen.x;
+        let curY = screen.y;
+        let curW = screen.width;
+
+        // Check if there is another monitor located directly above this one
+        for (let i = 0; i < allScreens.length; i++) {
+            let other = allScreens[i];
+            if (other === screen) continue;
+            
+            // Check horizontal overlap
+            let xOverlap = !(other.x + other.width <= curX || other.x >= curX + curW);
+            // Check if other's bottom is near this screen's top (within 50px tolerance)
+            let isAbove = (other.y + other.height >= curY - 50) && (other.y + other.height <= curY + 50);
+
+            if (xOverlap && isAbove) {
+                return "bottom";
+            }
+        }
+
+        return "top";
+    }
 
     // Plug-and-Play Module Declarations
     property var expandedLeft: ["sysmon", "workspaces"]

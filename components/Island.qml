@@ -6,31 +6,45 @@ import ".."
 Rectangle {
     id: root
 
+    property string anchorEdge: "top"
+    readonly property bool isBottomAnchor: anchorEdge === "bottom"
+
     // Symmetrical Pill Capsule sizing with Apple proportions
     implicitWidth: Math.max(expandedRow.implicitWidth + 32, 780)
     implicitHeight: Config.expandedHeight
 
-    // Hanging Apple Notch geometry: anchored seamlessly to the top bezel, bottom corners rounded
-    bottomLeftRadius: 22
-    bottomRightRadius: 22
-    topLeftRadius: 0
-    topRightRadius: 0
+    // Hanging or Docked Apple Notch geometry:
+    // When top-anchored: top corners square (0px), bottom corners rounded (22px)
+    // When bottom-anchored: bottom corners square (0px), top corners rounded (22px)
+    bottomLeftRadius: root.isBottomAnchor ? 0 : 22
+    bottomRightRadius: root.isBottomAnchor ? 0 : 22
+    topLeftRadius: root.isBottomAnchor ? 22 : 0
+    topRightRadius: root.isBottomAnchor ? 22 : 0
 
     color: Config.islandBg
     border.color: Config.islandBorder
     border.width: 1
 
-    // Fluid organic expansion anchored to top bezel
-    transformOrigin: Item.Top
+    // Fluid organic expansion anchored to the respective screen bezel
+    transformOrigin: root.isBottomAnchor ? Item.Bottom : Item.Top
     scale: Config.notchVisible ? 1.0 : 0.70
     opacity: Config.notchVisible ? 1.0 : 0.0
 
-    // Vertical slide: -1 to anchor directly flush into the top screen bezel
-    y: Config.notchVisible ? -1 : -(implicitHeight + 10)
+    // Vertical slide:
+    // Top anchor: slides down from offscreen (-implicitHeight - 10) to -1 (flush into top bezel)
+    // Bottom anchor: slides up from offscreen (parent.height + 10) to parent.height - implicitHeight + 1 (flush into bottom bezel)
+    y: {
+        if (root.isBottomAnchor) {
+            return Config.notchVisible ? (parent.height - implicitHeight + 1) : (parent.height + 10);
+        } else {
+            return Config.notchVisible ? -1 : -(implicitHeight + 10);
+        }
+    }
 
-    // Flush top seam cover to ensure zero gap or light leak with the top bezel
+    // Flush bezel seam cover: eliminates any sub-pixel gap or light leak with the active bezel
     Rectangle {
-        anchors.top: parent.top
+        anchors.top: root.isBottomAnchor ? undefined : parent.top
+        anchors.bottom: root.isBottomAnchor ? parent.bottom : undefined
         anchors.left: parent.left
         anchors.right: parent.right
         height: 2

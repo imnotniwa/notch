@@ -21,13 +21,24 @@ ShellRoot {
                 // Strictly visible only on the monitor that currently has focus!
                 visible: modelData.name === activeMonitorName
 
+                // Detect whether this screen should anchor top or bottom
+                readonly property string anchorEdge: Config.getAnchorForScreen(modelData, Quickshell.screens)
+                readonly property bool isBottomAnchor: anchorEdge === "bottom"
+
+                onVisibleChanged: {
+                    if (visible) {
+                        Config.activeAnchorEdge = anchorEdge;
+                    }
+                }
+
                 anchors {
-                    top: true
+                    top: !barWindow.isBottomAnchor
+                    bottom: barWindow.isBottomAnchor
                     left: true
                     right: true
                 }
 
-                // Window height provides space for hanging island and downward tooltips
+                // Window height provides space for hanging/docked island and tooltips
                 implicitHeight: Config.expandedHeight + 46
                 color: "transparent"
 
@@ -35,35 +46,36 @@ ShellRoot {
                 exclusiveZone: 0
 
                 // Symmetrical Dynamic Island Anchor:
-                // Perfectly centered at the top of the display
+                // Perfectly centered horizontally on the display
                 property real targetX: Math.round((barWindow.width - island.implicitWidth) / 2)
 
                 // Click-through mask:
-                // When notch is hidden, only the top trigger hotspot is masked.
+                // When notch is hidden, only the edge trigger hotspot is masked.
                 // When notch is visible, the entire island and its active interaction zone receive pointer input.
                 mask: Region {
-                    item: Config.notchVisible ? barWindowArea : topTrigger
+                    item: Config.notchVisible ? barWindowArea : edgeTrigger
                 }
 
                 // Interactive region when visible: encompasses island + tooltip space
                 Item {
                     id: barWindowArea
                     x: island.x
-                    y: 0
+                    y: barWindow.isBottomAnchor ? island.y - 40 : island.y
                     width: island.width
                     height: island.height + 40
                 }
 
-                // Top Edge Hotspot: catches mouse hovering along the top bezel
+                // Bezel Edge Hotspot: catches mouse hovering along the anchor bezel
                 Item {
-                    id: topTrigger
-                    anchors.top: parent.top
+                    id: edgeTrigger
+                    anchors.top: barWindow.isBottomAnchor ? undefined : parent.top
+                    anchors.bottom: barWindow.isBottomAnchor ? parent.bottom : undefined
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: 8
 
                     HoverHandler {
-                        id: topHover
+                        id: edgeHover
                         onHoveredChanged: {
                             if (hovered) {
                                 Config.notchHovered = true;
@@ -75,6 +87,7 @@ ShellRoot {
                 Island {
                     id: island
                     x: barWindow.targetX
+                    anchorEdge: barWindow.anchorEdge
 
                     Behavior on x {
                         NumberAnimation {

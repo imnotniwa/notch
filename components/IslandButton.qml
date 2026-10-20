@@ -96,13 +96,15 @@ Rectangle {
         }
     }
 
-    // Tooltip display on hover
+    // Tooltip display on hover: dynamically placed opposite to the anchor bezel
     StyledTooltip {
         id: tip
         text: root.tooltip
         visible: mouseArea.containsMouse && root.tooltip !== ""
-        anchors.top: root.bottom
-        anchors.topMargin: 8
+        anchors.top: Config.activeAnchorEdge === "bottom" ? undefined : root.bottom
+        anchors.bottom: Config.activeAnchorEdge === "bottom" ? root.top : undefined
+        anchors.topMargin: Config.activeAnchorEdge === "bottom" ? 0 : 8
+        anchors.bottomMargin: Config.activeAnchorEdge === "bottom" ? 8 : 0
         anchors.horizontalCenter: root.horizontalCenter
     }
 }
