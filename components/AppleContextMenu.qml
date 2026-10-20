@@ -1,0 +1,144 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Wayland
+import Quickshell.Hyprland
+import ".."
+
+PanelWindow {
+    id: root
+
+    WlrLayershell.layer: WlrLayer.Overlay
+    visible: Config.trayMenuVisible
+
+    anchors {
+        top: true
+        left: true
+    }
+
+    margins {
+        top: Config.trayMenuY
+        left: Math.max(16, Math.min(Config.trayMenuX, (screen ? screen.width : 1920) - implicitWidth - 16))
+    }
+
+    color: "transparent"
+    implicitWidth: Math.max(190, menuCard.implicitWidth)
+    implicitHeight: menuCard.implicitHeight
+
+    HyprlandFocusGrab {
+        id: grab
+        windows: [ root ]
+        active: Config.trayMenuVisible
+        onCleared: {
+            Config.trayMenuVisible = false;
+        }
+    }
+
+    QsMenuOpener {
+        id: opener
+        menu: Config.trayActiveMenu
+    }
+
+    Rectangle {
+        id: menuCard
+        anchors.fill: parent
+        implicitHeight: col.implicitHeight + 14
+        implicitWidth: Math.max(190, col.implicitWidth + 24)
+        radius: 14
+
+        // Apple Dark Translucent Acrylic Material
+        color: "#f018181b"
+        border.color: Qt.rgba(1, 1, 1, 0.14)
+        border.width: 1
+
+        scale: Config.trayMenuVisible ? 1.0 : 0.94
+        opacity: Config.trayMenuVisible ? 1.0 : 0.0
+
+        Behavior on scale {
+            NumberAnimation {
+                duration: 160
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 140
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        ColumnLayout {
+            id: col
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 5
+            spacing: 2
+
+            Repeater {
+                model: opener.children
+
+                Rectangle {
+                    required property var modelData
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: modelData.isSeparator ? 1 : 28
+                    radius: 7
+
+                    readonly property bool isDestructive: {
+                        let txt = (modelData.text || "").toLowerCase();
+                        return txt.indexOf("quit") !== -1 || txt.indexOf("exit") !== -1;
+                    }
+
+                    color: modelData.isSeparator 
+                        ? Qt.rgba(1, 1, 1, 0.1) 
+                        : (itemMouse.containsMouse 
+                            ? (isDestructive ? Qt.rgba(1, 0.27, 0.23, 0.2) : Qt.rgba(1, 1, 1, 0.12)) 
+                            : "transparent")
+
+                    // Separator divider
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: modelData.isSeparator
+                        color: Qt.rgba(1, 1, 1, 0.1)
+                        height: 1
+                    }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 9
+                        anchors.rightMargin: 9
+                        spacing: 8
+                        visible: !modelData.isSeparator
+
+                        Text {
+                            text: modelData.text || ""
+                            color: isDestructive 
+                                ? Config.danger 
+                                : (modelData.enabled ? Config.mainFg : Config.dimFg)
+                            font.family: Config.fontFamily
+                            font.pixelSize: 12
+                            font.weight: isDestructive ? Font.Medium : Font.Normal
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    MouseArea {
+                        id: itemMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: !modelData.isSeparator && modelData.enabled
+                        cursorShape: Qt.PointingHandCursor
+
+                        onClicked: {
+                            modelData.triggered();
+                            Config.trayMenuVisible = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

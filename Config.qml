@@ -46,9 +46,15 @@ Item {
     property bool manualExpand: false
     property bool powerModalVisible: false
 
-    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, or power modal open
+    // Apple Context Menu State
+    property var trayActiveMenu: null
+    property real trayMenuX: 0
+    property real trayMenuY: 0
+    property bool trayMenuVisible: false
+
+    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, or tray menu active
     property bool notchHovered: false
-    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible
+    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible
     readonly property bool expanded: notchVisible
 
     // Plug-and-Play Module Declarations

@@ -1,3 +1,4 @@
+//@ pragma UseQApplication
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
@@ -79,6 +80,18 @@ ShellRoot {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Apple-style Fluid Context Menu Window per screen
+    Variants {
+        model: Config.trayMenuVisible ? Quickshell.screens : []
+        delegate: Component {
+            AppleContextMenu {
+                required property var modelData
+                screen: modelData
+                visible: modelData.name === activeMonitorName && Config.trayMenuVisible
             }
         }
     }

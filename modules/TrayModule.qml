@@ -45,16 +45,40 @@ Item {
 
                     onClicked: (mouse) => {
                         if (mouse.button === Qt.RightButton) {
-                            trayItemContainer.modelData.secondaryActivate();
+                            if (trayItemContainer.modelData.hasMenu && trayItemContainer.modelData.menu) {
+                                if (Config.trayMenuVisible && Config.trayActiveMenu === trayItemContainer.modelData.menu) {
+                                    Config.trayMenuVisible = false;
+                                } else {
+                                    let pt = trayItemContainer.mapToItem(null, 0, 0);
+                                    Config.trayMenuX = Math.round(pt.x - 40);
+                                    Config.trayMenuY = Config.expandedHeight + 4;
+                                    Config.trayActiveMenu = trayItemContainer.modelData.menu;
+                                    Config.trayMenuVisible = true;
+                                }
+                            } else {
+                                trayItemContainer.modelData.secondaryActivate();
+                            }
                         } else {
-                            trayItemContainer.modelData.activate();
+                            if (trayItemContainer.modelData.onlyMenu && trayItemContainer.modelData.hasMenu && trayItemContainer.modelData.menu) {
+                                if (Config.trayMenuVisible && Config.trayActiveMenu === trayItemContainer.modelData.menu) {
+                                    Config.trayMenuVisible = false;
+                                } else {
+                                    let pt = trayItemContainer.mapToItem(null, 0, 0);
+                                    Config.trayMenuX = Math.round(pt.x - 40);
+                                    Config.trayMenuY = Config.expandedHeight + 4;
+                                    Config.trayActiveMenu = trayItemContainer.modelData.menu;
+                                    Config.trayMenuVisible = true;
+                                }
+                            } else {
+                                trayItemContainer.modelData.activate();
+                            }
                         }
                     }
                 }
 
                 StyledTooltip {
                     text: trayItemContainer.modelData.tooltipTitle || trayItemContainer.modelData.title || ""
-                    visible: mouseArea.containsMouse && text !== ""
+                    visible: mouseArea.containsMouse && !Config.trayMenuVisible && text !== ""
                     anchors.top: trayItemContainer.bottom
                     anchors.topMargin: 6
                     anchors.horizontalCenter: trayItemContainer.horizontalCenter
