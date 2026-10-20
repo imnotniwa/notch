@@ -42,7 +42,7 @@ Item {
             icon: ""
             tooltip: "Power Menu: Lock, Sleep, Logout, Reboot, Shutdown"
             textColor: Config.danger
-            hoverBgColor: Config.danger
+            hoverBgColor: Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.16)
             onClicked: {
                 Config.powerModalVisible = true;
             }

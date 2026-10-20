@@ -27,21 +27,31 @@ ShellRoot {
                     right: true
                 }
 
-                // Window height provides space for hanging island
-                implicitHeight: Config.expandedHeight + 14
+                // Window height provides space for hanging island and downward tooltips
+                implicitHeight: Config.expandedHeight + 46
                 color: "transparent"
 
                 // Zero exclusiveZone: Never resize, tile, or disturb application windows!
                 exclusiveZone: 0
 
-                // Dynamic Horizontal Anchor: island drops down centered on where cursor entered the top bezel
-                property real targetX: (barWindow.width - island.implicitWidth) / 2
+                // Symmetrical Dynamic Island Anchor:
+                // Perfectly centered at the top of the display
+                property real targetX: Math.round((barWindow.width - island.implicitWidth) / 2)
 
                 // Click-through mask:
                 // When notch is hidden, only the top trigger hotspot is masked.
-                // When notch is visible, the entire island receives pointer input.
+                // When notch is visible, the entire island and its active interaction zone receive pointer input.
                 mask: Region {
-                    item: Config.notchVisible ? island : topTrigger
+                    item: Config.notchVisible ? barWindowArea : topTrigger
+                }
+
+                // Interactive region when visible: encompasses island + tooltip space
+                Item {
+                    id: barWindowArea
+                    x: island.x
+                    y: 0
+                    width: island.width
+                    height: island.height + 40
                 }
 
                 // Top Edge Hotspot: catches mouse hovering along the top bezel
@@ -56,13 +66,6 @@ ShellRoot {
                         id: topHover
                         onHoveredChanged: {
                             if (hovered) {
-                                // Center island on the cursor x touchpoint, clamped within screen margins
-                                let halfW = island.implicitWidth / 2;
-                                let margin = 16;
-                                let minX = margin;
-                                let maxX = Math.max(margin, barWindow.width - island.implicitWidth - margin);
-                                let desiredX = topHover.point.position.x - halfW;
-                                barWindow.targetX = Math.max(minX, Math.min(maxX, desiredX));
                                 Config.notchHovered = true;
                             }
                         }

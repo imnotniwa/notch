@@ -120,6 +120,7 @@ Item {
             icon: "󰍛"
             text: root.cpuUsage
             tooltip: "CPU: " + root.cpuUsage + (root.cpuTemp !== "" ? " (" + root.cpuTemp + ")" : "")
+            isMonoFont: true
         }
 
         // Memory
@@ -127,6 +128,7 @@ Item {
             icon: "󰾆"
             text: root.memUsage
             tooltip: "Memory Used: " + root.memUsage
+            isMonoFont: true
         }
 
         // CPU Info Temp
@@ -134,6 +136,7 @@ Item {
             visible: root.cpuTemp !== ""
             text: root.cpuTemp
             tooltip: "CPU Temperature"
+            isMonoFont: true
         }
 
         // GPU Info Temp
@@ -141,6 +144,7 @@ Item {
             visible: root.gpuTemp !== ""
             text: root.gpuTemp
             tooltip: "GPU Info (Click to toggle)"
+            isMonoFont: true
             onClicked: {
                 Config.run("hyde-shell gpuinfo --toggle");
             }

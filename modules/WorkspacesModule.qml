@@ -52,36 +52,47 @@ Item {
                 required property int modelData
                 readonly property bool isCurrent: root.activeWorkspaceId === modelData
                 
-                // Animated pill expansion for active workspace matching waybar
-                implicitWidth: isCurrent ? 28 : 20
-                implicitHeight: 20
-                radius: 10
+                // Apple fluid morphing capsule
+                implicitWidth: isCurrent ? 28 : 22
+                implicitHeight: 22
+                radius: 11
+                Layout.alignment: Qt.AlignVCenter
 
-                // Apple tactile feedback: scale on press, spring back
-                scale: wsMouse.pressed ? 0.90 : (wsMouse.containsMouse ? 1.05 : 1.0)
+                // Apple tactile feedback: instant press scale down, spring back
+                scale: wsMouse.pressed ? 0.90 : 1.0
                 transformOrigin: Item.Center
 
                 Behavior on scale {
                     NumberAnimation {
-                        duration: wsMouse.pressed ? 60 : 200
+                        duration: wsMouse.pressed ? 60 : 180
                         easing.type: wsMouse.pressed ? Easing.OutQuad : Easing.OutBack
                         easing.overshoot: 1.15
                     }
                 }
 
-                color: isCurrent ? Config.actBg : (wsMouse.containsMouse ? Qt.rgba(Config.hvrBg.r, Config.hvrBg.g, Config.hvrBg.b, 0.3) : Qt.rgba(1, 1, 1, 0.08))
+                Behavior on implicitWidth {
+                    NumberAnimation {
+                        duration: 220
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                // Apple Material Hierarchy: Active Vibrant Blue, Hover Frosted Glass, Inactive Translucent Sub-pill
+                color: isCurrent ? Config.actBg : (wsMouse.pressed ? Qt.rgba(1, 1, 1, 0.18) : (wsMouse.containsMouse ? Config.hvrBg : Qt.rgba(1, 1, 1, 0.06)))
+                border.color: isCurrent ? "transparent" : (wsMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                border.width: 1
 
                 Behavior on color {
-                    ColorAnimation { duration: 180 }
+                    ColorAnimation { duration: 120 }
                 }
 
                 Text {
                     anchors.centerIn: parent
-                    text: modelData.toString()
+                    text: wsBtn.modelData.toString()
                     color: wsBtn.isCurrent ? Config.actFg : (wsMouse.containsMouse ? Config.hvrFg : Config.mainFg)
-                    font.family: Config.fontFamily
+                    font.family: Config.monoFontFamily
                     font.pixelSize: Config.fontSize
-                    font.bold: wsBtn.isCurrent
+                    font.weight: wsBtn.isCurrent ? Font.DemiBold : Font.Normal
                 }
 
                 MouseArea {

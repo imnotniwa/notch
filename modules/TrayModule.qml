@@ -24,10 +24,27 @@ Item {
                 id: trayItemContainer
                 required property var modelData
 
-                implicitWidth: 20
-                implicitHeight: 20
-                radius: 4
-                color: mouseArea.containsMouse ? Qt.rgba(Config.hvrBg.r, Config.hvrBg.g, Config.hvrBg.b, 0.25) : "transparent"
+                implicitWidth: 22
+                implicitHeight: 22
+                radius: 6
+                Layout.alignment: Qt.AlignVCenter
+
+                scale: mouseArea.pressed ? 0.90 : 1.0
+                transformOrigin: Item.Center
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: mouseArea.pressed ? 60 : 180
+                        easing.type: mouseArea.pressed ? Easing.OutQuad : Easing.OutBack
+                        easing.overshoot: 1.15
+                    }
+                }
+
+                color: mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.18) : (mouseArea.containsMouse ? Config.hvrBg : "transparent")
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 IconImage {
                     anchors.centerIn: parent

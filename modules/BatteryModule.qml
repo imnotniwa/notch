@@ -65,5 +65,6 @@ Item {
         text: (root.compactMode ? (root.isDischarging ? root.capacity + "%" : "") : root.capacity + "%")
         textColor: root.batteryColor
         tooltip: "Battery: " + root.capacity + "% (" + root.status + ")"
+        isMonoFont: true
     }
 }

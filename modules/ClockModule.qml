@@ -30,5 +30,6 @@ Item {
         icon: ""
         text: root.timeStr
         tooltip: root.dateStr
+        isMonoFont: true
     }
 }

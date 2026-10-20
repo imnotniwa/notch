@@ -51,10 +51,29 @@ Item {
                 readonly property bool isActive: modelData.activated
 
                 implicitWidth: isActive ? Math.min(titleText.implicitWidth + 30, 160) : 26
-                implicitHeight: 24
-                radius: 12
-                color: isActive ? Config.actBg : (mouse.containsMouse ? Qt.rgba(Config.hvrBg.r, Config.hvrBg.g, Config.hvrBg.b, 0.25) : Qt.rgba(1, 1, 1, 0.07))
+                implicitHeight: 22
+                radius: 11
+                Layout.alignment: Qt.AlignVCenter
+
+                scale: mouse.pressed ? 0.92 : 1.0
+                transformOrigin: Item.Center
+
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: mouse.pressed ? 60 : 180
+                        easing.type: mouse.pressed ? Easing.OutQuad : Easing.OutBack
+                        easing.overshoot: 1.15
+                    }
+                }
+
+                color: isActive ? Config.actBg : (mouse.pressed ? Qt.rgba(1, 1, 1, 0.18) : (mouse.containsMouse ? Config.hvrBg : Qt.rgba(1, 1, 1, 0.06)))
+                border.color: isActive ? "transparent" : (mouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                border.width: 1
                 clip: true
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 Behavior on implicitWidth {
                     NumberAnimation { duration: 200; easing.type: Easing.OutCubic }

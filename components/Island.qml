@@ -6,11 +6,11 @@ import ".."
 Rectangle {
     id: root
 
-    // Sizing animates smoothly between compact and expanded
-    implicitWidth: Math.max(expandedRow.implicitWidth + 36, 760)
+    // Symmetrical Pill Capsule sizing with Apple proportions
+    implicitWidth: Math.max(expandedRow.implicitWidth + 32, 780)
     implicitHeight: Config.expandedHeight
 
-    // Smooth hanging notch corners: bottom corners rounded, top flush with screen edge
+    // Hanging Apple Notch geometry: anchored seamlessly to the top bezel, bottom corners rounded
     bottomLeftRadius: 22
     bottomRightRadius: 22
     topLeftRadius: 0
@@ -20,15 +20,15 @@ Rectangle {
     border.color: Config.islandBorder
     border.width: 1
 
-    // Fluid organic water droplet expansion: transforms anchored to top bezel
+    // Fluid organic expansion anchored to top bezel
     transformOrigin: Item.Top
-    scale: Config.notchVisible ? 1.0 : 0.60
+    scale: Config.notchVisible ? 1.0 : 0.70
     opacity: Config.notchVisible ? 1.0 : 0.0
 
-    // Vertical slide transition: -1 when visible (flush/bleeding into top bezel), tucked offscreen when hidden
+    // Vertical slide: -1 to anchor directly flush into the top screen bezel
     y: Config.notchVisible ? -1 : -(implicitHeight + 10)
 
-    // Flush top lip: covers any 1px sub-pixel line or top border seam with bezel
+    // Flush top seam cover to ensure zero gap or light leak with the top bezel
     Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
@@ -42,15 +42,15 @@ Rectangle {
         NumberAnimation {
             duration: Config.notchVisible ? 260 : 190
             easing.type: Config.notchVisible ? Easing.OutBack : Easing.InQuad
-            easing.overshoot: 1.14
+            easing.overshoot: 1.10
         }
     }
 
     Behavior on scale {
         NumberAnimation {
-            duration: Config.notchVisible ? 280 : 180
+            duration: Config.notchVisible ? 260 : 180
             easing.type: Config.notchVisible ? Easing.OutBack : Easing.InQuad
-            easing.overshoot: 1.12
+            easing.overshoot: 1.08
         }
     }
 
@@ -61,44 +61,56 @@ Rectangle {
         }
     }
 
-    // Deck View: Media & System Controls Deck
+    // Deck View: Balanced Symmetrical Layout
+    // Left Wing (SysMon, Workspaces, Battery) <---> Center Core (Clock / Dynamic Island Media) <---> Right Wing (Audio, Backlight, QuickSettings, Pin)
     RowLayout {
         id: expandedRow
         anchors.centerIn: parent
         spacing: 8
         opacity: Config.notchVisible ? 1.0 : 0.0
-        scale: Config.notchVisible ? 1.0 : 0.88
+        scale: Config.notchVisible ? 1.0 : 0.92
 
         Behavior on opacity {
             NumberAnimation {
-                duration: Config.notchVisible ? 220 : 120
+                duration: Config.notchVisible ? 200 : 120
                 easing.type: Easing.OutCubic
             }
         }
 
         Behavior on scale {
             NumberAnimation {
-                duration: Config.notchVisible ? 240 : 140
+                duration: Config.notchVisible ? 220 : 140
                 easing.type: Config.notchVisible ? Easing.OutBack : Easing.InQuad
-                easing.overshoot: 1.06
+                easing.overshoot: 1.05
             }
         }
 
-        // LEFT CLUSTER: System Monitors, Workspaces & Clock
-        IslandPill {
-            SysMonModule {}
-        }
-
+        // ====================================================
+        // LEFT WING (System & Task Scope): Workspaces, SysMon, Battery
+        // ====================================================
         IslandPill {
             WorkspacesModule {}
         }
 
         IslandPill {
-            ClockModule {}
+            SysMonModule {}
         }
 
-        // CENTER CLUSTER: Dynamic Media Player or Taskbar
         IslandPill {
+            BatteryModule {}
+        }
+
+        // ====================================================
+        // CENTER CORE (Anchor & Dynamic Activity): Clock + Dynamic Media
+        // ====================================================
+        IslandPill {
+            paddingHorizontal: 10
+            spacing: 8
+
+            // Always present symmetrical focal clock
+            ClockModule {}
+
+            // Dynamic Apple Live Activity island module (Media / Active Task)
             MediaModule {
                 id: mediaModule
             }
@@ -108,17 +120,15 @@ Rectangle {
             }
         }
 
-        // RIGHT CLUSTER: Hardware Audio, Backlight, Quick Settings & Battery
+        // ====================================================
+        // RIGHT WING (Hardware & Control Center): Audio, Backlight, QuickSettings, Pin
+        // ====================================================
         IslandPill {
             AudioModule {}
         }
 
         IslandPill {
             BacklightModule {}
-        }
-
-        IslandPill {
-            BatteryModule {}
         }
 
         IslandPill {
@@ -134,6 +144,7 @@ Rectangle {
 
         // PIN TOGGLE
         IslandPill {
+            paddingHorizontal: 4
             IslandButton {
                 icon: Config.isPinned ? "󰐃" : "󰤱"
                 tooltip: Config.isPinned ? "Unpin Dynamic Island" : "Pin Dynamic Island open"

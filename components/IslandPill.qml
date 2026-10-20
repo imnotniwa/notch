@@ -10,7 +10,7 @@ Rectangle {
     property int paddingVertical: 4
 
     implicitWidth: row.implicitWidth + (paddingHorizontal * 2)
-    implicitHeight: row.implicitHeight + (paddingVertical * 2)
+    implicitHeight: Math.max(row.implicitHeight + (paddingVertical * 2), 30)
 
     radius: Config.innerPillRadius
     color: Config.subPillBg

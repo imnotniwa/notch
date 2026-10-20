@@ -3,37 +3,39 @@ import QtQuick
 import Quickshell.Io
 
 Item {
-    // Fonts & Dimensions
-    readonly property string fontFamily: "JetBrainsMono Nerd Font"
-    readonly property int fontSize: 10
+    // Apple San Francisco / System Font with monospace fallbacks for clean typography
+    readonly property string fontFamily: "SF Pro Text, -apple-system, BlinkMacSystemFont, 'Inter', 'JetBrainsMono Nerd Font', sans-serif"
+    readonly property string monoFontFamily: "SF Mono, 'JetBrainsMono Nerd Font', 'Fira Code', monospace"
+    readonly property int fontSize: 11
     readonly property int iconSize: 13
     
-    readonly property int expandedHeight: 50
-    readonly property int pillRadius: 16
-    readonly property int innerPillRadius: 11
+    readonly property int expandedHeight: 46
+    readonly property int pillRadius: 23
+    readonly property int innerPillRadius: 15
 
-    // Apple Dynamic Island + Rose Pine Palette
-    // Pure pitch OLED black for the outer island capsule
+    // Apple Dynamic Island Material System
+    // Pitch OLED black for seamless bezel integration
     readonly property color islandBg: "#000000"
-    // Delicate specular rim that catches the light
-    readonly property color islandBorder: Qt.rgba(1, 1, 1, 0.14)
-    readonly property color subPillBg: Qt.rgba(1, 1, 1, 0.07)
-    readonly property color subPillBorder: Qt.rgba(1, 1, 1, 0.08)
+    // Specular highlight rim: authentic Apple dark glass reflection
+    readonly property color islandBorder: Qt.rgba(1, 1, 1, 0.12)
+    // Translucent dark glass inner capsules
+    readonly property color subPillBg: Qt.rgba(1, 1, 1, 0.08)
+    readonly property color subPillBorder: Qt.rgba(1, 1, 1, 0.07)
     
     // High contrast vibrant typography
-    readonly property color mainFg: "#f0f0f5"
-    readonly property color dimFg: "#9898a6"
+    readonly property color mainFg: "#f5f5f7"
+    readonly property color dimFg: "#86868b"
     
-    // Apple vibrant system accents
-    readonly property color actBg: "#0a84ff"
+    // Apple vibrant system accents (WWDC standard)
+    readonly property color actBg: "#0071e3"
     readonly property color actFg: "#ffffff"
     
-    readonly property color hvrBg: "#eb6f92"
+    readonly property color hvrBg: Qt.rgba(1, 1, 1, 0.14)
     readonly property color hvrFg: "#ffffff"
     
-    readonly property color success: "#30d158"
-    readonly property color warning: "#ffd60a"
-    readonly property color danger: "#ff453a"
+    readonly property color success: "#34c759"
+    readonly property color warning: "#ff9f0a"
+    readonly property color danger: "#ff3b30"
 
     // Apple Spring Dynamics
     // Damping ~1.0 with subtle natural settling

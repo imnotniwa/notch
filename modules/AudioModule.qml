@@ -42,6 +42,7 @@ Item {
             icon: root.sinkIcon
             text: root.volumePct + "%"
             tooltip: (root.isMuted ? "Muted" : "Volume: " + root.volumePct + "%") + " (Scroll: Adjust, Click: Pavucontrol, Middle: Mute)"
+            isMonoFont: true
 
             onClicked: {
                 Config.run("pavucontrol || pavucontrol-qt");

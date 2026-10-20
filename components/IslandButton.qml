@@ -9,11 +9,12 @@ Rectangle {
     property string icon: ""
     property string tooltip: ""
     property bool active: false
+    property bool isMonoFont: false
     property color textColor: active ? Config.actFg : (mouseArea.containsMouse ? Config.hvrFg : Config.mainFg)
-    property color hoverBgColor: Qt.rgba(1, 1, 1, 0.10)
+    property color hoverBgColor: Qt.rgba(1, 1, 1, 0.12)
     property color activeBgColor: Config.actBg
-    property int customPaddingH: 6
-    property int customPaddingV: 3
+    property int customPaddingH: 8
+    property int customPaddingV: 4
 
     signal clicked()
     signal rightClicked()
@@ -22,23 +23,23 @@ Rectangle {
     signal scrolledDown()
 
     implicitWidth: contentRow.implicitWidth + (customPaddingH * 2)
-    implicitHeight: Math.max(contentRow.implicitHeight + (customPaddingV * 2), 22)
-    radius: 7
+    implicitHeight: Math.max(contentRow.implicitHeight + (customPaddingV * 2), 26)
+    radius: 9
 
     // Apple tactile feedback: scale down on press, spring back on release
-    scale: mouseArea.pressed ? 0.93 : (mouseArea.containsMouse ? 1.02 : 1.0)
+    scale: mouseArea.pressed ? 0.92 : 1.0
     transformOrigin: Item.Center
 
     Behavior on scale {
         NumberAnimation {
             duration: mouseArea.pressed ? 60 : 180
             easing.type: mouseArea.pressed ? Easing.OutQuad : Easing.OutBack
-            easing.overshoot: 1.12
+            easing.overshoot: 1.15
         }
     }
 
     // Apple subtle translucent material highlight
-    color: active ? activeBgColor : (mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.16) : (mouseArea.containsMouse ? hoverBgColor : "transparent"))
+    color: active ? activeBgColor : (mouseArea.pressed ? Qt.rgba(1, 1, 1, 0.18) : (mouseArea.containsMouse ? hoverBgColor : "transparent"))
 
     Behavior on color {
         ColorAnimation { duration: 120 }
@@ -62,9 +63,9 @@ Rectangle {
             visible: root.text !== ""
             text: root.text
             color: root.textColor
-            font.family: Config.fontFamily
+            font.family: root.isMonoFont ? Config.monoFontFamily : Config.fontFamily
             font.pixelSize: Config.fontSize
-            font.bold: root.active
+            font.weight: root.active ? Font.DemiBold : Font.Normal
             Layout.alignment: Qt.AlignVCenter
         }
     }
