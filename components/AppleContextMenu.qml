@@ -34,11 +34,17 @@ PanelWindow {
 
     Rectangle {
         id: menuCard
+        readonly property bool isBottom: Config.activeAnchorEdge === "bottom"
+        readonly property real targetY: isBottom ? (Config.trayMenuY - height) : Config.trayMenuY
+
         x: Math.max(16, Math.min(Config.trayMenuX, (screen ? screen.width : 1920) - width - 16))
-        y: Config.trayMenuY
+        y: Math.max(16, Math.min(targetY, (screen ? screen.height : 1080) - height - 16))
         width: Math.max(190, col.implicitWidth + 24)
         implicitHeight: col.implicitHeight + 14
         radius: 14
+
+        // Apple spatial consistency: originate animation toward the trigger origin
+        transformOrigin: isBottom ? Item.BottomLeft : Item.TopLeft
 
         // Prevent clicks on the menu card from triggering backdrop dismiss
         MouseArea {
@@ -56,8 +62,9 @@ PanelWindow {
 
         Behavior on scale {
             NumberAnimation {
-                duration: 160
-                easing.type: Easing.OutCubic
+                duration: 180
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.08
             }
         }
 

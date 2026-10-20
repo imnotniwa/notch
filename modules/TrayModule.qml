@@ -61,14 +61,18 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onClicked: (mouse) => {
+                        let isBottom = Config.activeAnchorEdge === "bottom";
+                        let pt = trayItemContainer.mapToItem(null, 0, 0);
+                        let targetX = Math.round(pt.x - 40);
+                        let targetY = isBottom ? (screen ? screen.height - Config.expandedHeight - 12 : 1000) : (Config.expandedHeight + 6);
+
                         if (mouse.button === Qt.RightButton) {
                             if (trayItemContainer.modelData.hasMenu && trayItemContainer.modelData.menu) {
                                 if (Config.trayMenuVisible && Config.trayActiveMenu === trayItemContainer.modelData.menu) {
                                     Config.trayMenuVisible = false;
                                 } else {
-                                    let pt = trayItemContainer.mapToItem(null, 0, 0);
-                                    Config.trayMenuX = Math.round(pt.x - 40);
-                                    Config.trayMenuY = Config.expandedHeight + 4;
+                                    Config.trayMenuX = targetX;
+                                    Config.trayMenuY = targetY;
                                     Config.trayActiveMenu = trayItemContainer.modelData.menu;
                                     Config.trayMenuVisible = true;
                                 }
@@ -80,9 +84,8 @@ Item {
                                 if (Config.trayMenuVisible && Config.trayActiveMenu === trayItemContainer.modelData.menu) {
                                     Config.trayMenuVisible = false;
                                 } else {
-                                    let pt = trayItemContainer.mapToItem(null, 0, 0);
-                                    Config.trayMenuX = Math.round(pt.x - 40);
-                                    Config.trayMenuY = Config.expandedHeight + 4;
+                                    Config.trayMenuX = targetX;
+                                    Config.trayMenuY = targetY;
                                     Config.trayActiveMenu = trayItemContainer.modelData.menu;
                                     Config.trayMenuVisible = true;
                                 }
@@ -96,8 +99,10 @@ Item {
                 StyledTooltip {
                     text: trayItemContainer.modelData.tooltipTitle || trayItemContainer.modelData.title || ""
                     visible: mouseArea.containsMouse && !Config.trayMenuVisible && text !== ""
-                    anchors.top: trayItemContainer.bottom
-                    anchors.topMargin: 6
+                    anchors.top: Config.activeAnchorEdge === "bottom" ? undefined : trayItemContainer.bottom
+                    anchors.bottom: Config.activeAnchorEdge === "bottom" ? trayItemContainer.top : undefined
+                    anchors.topMargin: Config.activeAnchorEdge === "bottom" ? 0 : 8
+                    anchors.bottomMargin: Config.activeAnchorEdge === "bottom" ? 8 : 0
                     anchors.horizontalCenter: trayItemContainer.horizontalCenter
                 }
             }
