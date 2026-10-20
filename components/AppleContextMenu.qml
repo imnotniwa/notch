@@ -35,10 +35,12 @@ PanelWindow {
     Rectangle {
         id: menuCard
         readonly property bool isBottom: Config.activeAnchorEdge === "bottom"
-        readonly property real targetY: isBottom ? (Config.trayMenuY - height) : Config.trayMenuY
+        readonly property real screenH: screen ? screen.height : 1080
+        readonly property real screenW: screen ? screen.width : 1920
 
-        x: Math.max(16, Math.min(Config.trayMenuX, (screen ? screen.width : 1920) - width - 16))
-        y: Math.max(16, Math.min(targetY, (screen ? screen.height : 1080) - height - 16))
+        x: Math.max(16, Math.min(Config.trayMenuX, screenW - width - 16))
+        // Position upward above bottom notch or downward below top notch
+        y: isBottom ? (screenH - Config.expandedHeight - height - 12) : (Config.expandedHeight + 8)
         width: Math.max(190, col.implicitWidth + 24)
         implicitHeight: col.implicitHeight + 14
         radius: 14

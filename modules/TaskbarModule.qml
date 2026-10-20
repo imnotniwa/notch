@@ -124,8 +124,10 @@ Item {
                 StyledTooltip {
                     text: taskItem.windowTitle
                     visible: mouse.containsMouse && !taskItem.isActive
-                    anchors.top: taskItem.bottom
-                    anchors.topMargin: 6
+                    anchors.top: Config.activeAnchorEdge === "bottom" ? undefined : taskItem.bottom
+                    anchors.bottom: Config.activeAnchorEdge === "bottom" ? taskItem.top : undefined
+                    anchors.topMargin: Config.activeAnchorEdge === "bottom" ? 0 : 8
+                    anchors.bottomMargin: Config.activeAnchorEdge === "bottom" ? 8 : 0
                     anchors.horizontalCenter: taskItem.horizontalCenter
                 }
             }

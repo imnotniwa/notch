@@ -61,10 +61,8 @@ Item {
                     cursorShape: Qt.PointingHandCursor
 
                     onClicked: (mouse) => {
-                        let isBottom = Config.activeAnchorEdge === "bottom";
                         let pt = trayItemContainer.mapToItem(null, 0, 0);
                         let targetX = Math.round(pt.x - 40);
-                        let targetY = isBottom ? (screen ? screen.height - Config.expandedHeight - 12 : 1000) : (Config.expandedHeight + 6);
 
                         if (mouse.button === Qt.RightButton) {
                             if (trayItemContainer.modelData.hasMenu && trayItemContainer.modelData.menu) {
@@ -72,7 +70,6 @@ Item {
                                     Config.trayMenuVisible = false;
                                 } else {
                                     Config.trayMenuX = targetX;
-                                    Config.trayMenuY = targetY;
                                     Config.trayActiveMenu = trayItemContainer.modelData.menu;
                                     Config.trayMenuVisible = true;
                                 }
@@ -85,7 +82,6 @@ Item {
                                     Config.trayMenuVisible = false;
                                 } else {
                                     Config.trayMenuX = targetX;
-                                    Config.trayMenuY = targetY;
                                     Config.trayActiveMenu = trayItemContainer.modelData.menu;
                                     Config.trayMenuVisible = true;
                                 }
