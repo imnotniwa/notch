@@ -43,32 +43,19 @@ Item {
                         required property int index
 
                         readonly property bool isSelected: Config.galleryIndex === index
-                        implicitWidth: tabRow.implicitWidth + 14
+                        implicitWidth: 26
                         implicitHeight: 22
                         radius: 11
                         color: isSelected ? Qt.rgba(1, 1, 1, 0.16) : (tabMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : "transparent")
                         border.color: isSelected ? Qt.rgba(1, 1, 1, 0.14) : "transparent"
                         border.width: 1
 
-                        RowLayout {
-                            id: tabRow
+                        Text {
                             anchors.centerIn: parent
-                            spacing: 4
-
-                            Text {
-                                text: tabBtn.modelData.icon
-                                color: tabBtn.isSelected ? Config.actFg : Config.dimFg
-                                font.family: Config.fontFamily
-                                font.pixelSize: 11
-                            }
-
-                            Text {
-                                text: tabBtn.modelData.name
-                                color: tabBtn.isSelected ? Config.mainFg : Config.dimFg
-                                font.family: Config.fontFamily
-                                font.pixelSize: 11
-                                font.weight: tabBtn.isSelected ? Font.DemiBold : Font.Normal
-                            }
+                            text: tabBtn.modelData.icon
+                            color: tabBtn.isSelected ? Config.actFg : Config.dimFg
+                            font.family: Config.iconFont
+                            font.pixelSize: 12
                         }
 
                         MouseArea {
@@ -123,13 +110,6 @@ Item {
                             Config.galleryIndex = (Config.galleryIndex - 1 + root.tabModel.length) % root.tabModel.length;
                         }
                     }
-
-                    StyledTooltip {
-                        text: "Previous Card"
-                        visible: prevNavM.containsMouse
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: Config.activeAnchorEdge === "bottom" ? (-implicitHeight - 8) : (parent.height + 8)
-                    }
                 }
 
                 Rectangle {
@@ -164,20 +144,12 @@ Item {
                             Config.galleryIndex = (Config.galleryIndex + 1) % root.tabModel.length;
                         }
                     }
-
-                    StyledTooltip {
-                        text: "Next Card"
-                        visible: nextNavM.containsMouse
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: Config.activeAnchorEdge === "bottom" ? (-implicitHeight - 8) : (parent.height + 8)
-                    }
                 }
             }
 
             // Power Settings shortcut
             IslandButton {
                 icon: ""
-                tooltip: "Power Menu"
                 textColor: Config.danger
                 hoverBgColor: Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.16)
                 onClicked: {
@@ -188,7 +160,6 @@ Item {
             // Pin Button
             IslandButton {
                 icon: Config.isPinned ? "󰐃" : "󰤱"
-                tooltip: Config.isPinned ? "Unpin Dynamic Island" : "Pin Dynamic Island open"
                 active: Config.isPinned
                 onClicked: {
                     Config.isPinned = !Config.isPinned;
