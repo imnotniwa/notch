@@ -163,8 +163,7 @@ Item {
                     }
                     assertTrue(tip !== null, "Found StyledTooltip child in IslandButton");
                     if (tip) {
-                        assertEquals(tip.anchors.topMargin, 8, "When top-anchored, tooltip topMargin is 8");
-                        assertEquals(tip.anchors.bottomMargin, 0, "When top-anchored, tooltip bottomMargin is 0");
+                        assertEquals(tip.y, testButton.height + 8, "When top-anchored, tooltip y = button.height + 8");
                         assertTrue(tip.y >= testButton.height, "Tooltip is positioned below the button (y >= button height)");
                     }
                 }
@@ -182,9 +181,8 @@ Item {
                     }
                     assertTrue(tip !== null, "Found StyledTooltip child in IslandButton");
                     if (tip) {
-                        assertEquals(tip.anchors.bottomMargin, 8, "When bottom-anchored, tooltip bottomMargin is 8");
-                        assertEquals(tip.anchors.topMargin, 0, "When bottom-anchored, tooltip topMargin is 0");
-                        assertTrue(tip.y + tip.height <= 0, "Tooltip is positioned above the button (tip.y + tip.height <= 0)");
+                        assertEquals(tip.y, -tip.height - 8, "When bottom-anchored, tooltip y = -tip.height - 8");
+                        assertTrue(tip.y + tip.height <= 0, "Tooltip is positioned completely above the button (tip.y + tip.height <= 0)");
                     }
                 }
             },
@@ -201,10 +199,38 @@ Item {
                     }
                     assertTrue(tip !== null, "Found StyledTooltip child in IslandButton");
                     if (tip) {
-                        assertEquals(tip.anchors.topMargin, 8, "Tooltip topMargin restored to 8");
-                        assertEquals(tip.anchors.bottomMargin, 0, "Tooltip bottomMargin reset to 0");
+                        assertEquals(tip.y, testButton.height + 8, "After switching back to top, tooltip y = button.height + 8");
                         assertTrue(tip.y >= testButton.height, "Tooltip is restored below the button");
                     }
+                }
+            },
+            {
+                name: "Tooltip Placement: Multiple Repeated Flips (Bottom <-> Top)",
+                fn: function() {
+                    let tip = null;
+                    for (let i = 0; i < testButton.children.length; i++) {
+                        if (testButton.children[i].text !== undefined && testButton.children[i] !== testButton) {
+                            tip = testButton.children[i];
+                            break;
+                        }
+                    }
+                    assertTrue(tip !== null, "Found StyledTooltip child in IslandButton");
+
+                    // Flip to bottom
+                    Config.activeAnchorEdge = "bottom";
+                    assertEquals(tip.y, -tip.height - 8, "Repeated flip 1: bottom anchor y is above button");
+
+                    // Flip to top
+                    Config.activeAnchorEdge = "top";
+                    assertEquals(tip.y, testButton.height + 8, "Repeated flip 2: top anchor y is below button");
+
+                    // Flip to bottom again
+                    Config.activeAnchorEdge = "bottom";
+                    assertEquals(tip.y, -tip.height - 8, "Repeated flip 3: bottom anchor y is above button");
+
+                    // Flip back to top
+                    Config.activeAnchorEdge = "top";
+                    assertEquals(tip.y, testButton.height + 8, "Repeated flip 4: top anchor y is below button");
                 }
             },
             {

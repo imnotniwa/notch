@@ -101,10 +101,7 @@ Rectangle {
         id: tip
         text: root.tooltip
         visible: mouseArea.containsMouse && root.tooltip !== ""
-        anchors.top: Config.activeAnchorEdge === "bottom" ? undefined : root.bottom
-        anchors.bottom: Config.activeAnchorEdge === "bottom" ? root.top : undefined
-        anchors.topMargin: Config.activeAnchorEdge === "bottom" ? 0 : 8
-        anchors.bottomMargin: Config.activeAnchorEdge === "bottom" ? 8 : 0
         anchors.horizontalCenter: root.horizontalCenter
+        y: Config.activeAnchorEdge === "bottom" ? (-height - 8) : (root.height + 8)
     }
 }

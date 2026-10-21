@@ -95,11 +95,8 @@ Item {
                 StyledTooltip {
                     text: trayItemContainer.modelData.tooltipTitle || trayItemContainer.modelData.title || ""
                     visible: mouseArea.containsMouse && !Config.trayMenuVisible && text !== ""
-                    anchors.top: Config.activeAnchorEdge === "bottom" ? undefined : trayItemContainer.bottom
-                    anchors.bottom: Config.activeAnchorEdge === "bottom" ? trayItemContainer.top : undefined
-                    anchors.topMargin: Config.activeAnchorEdge === "bottom" ? 0 : 8
-                    anchors.bottomMargin: Config.activeAnchorEdge === "bottom" ? 8 : 0
                     anchors.horizontalCenter: trayItemContainer.horizontalCenter
+                    y: Config.activeAnchorEdge === "bottom" ? (-height - 8) : (trayItemContainer.height + 8)
                 }
             }
         }
