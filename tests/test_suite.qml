@@ -535,6 +535,53 @@ Item {
                     // Reset
                     Config.isPowerEventActive = false;
                 }
+            },
+            {
+                name: "Settings Card and Always On Compact Mode Lifecycle",
+                fn: function() {
+                    // Test initial state
+                    Config.isHovered = false;
+                    Config.notchHovered = false;
+                    Config.isPinned = false;
+                    Config.isDeckOpen = false;
+                    Config.alwaysOn = false;
+                    assertEquals(Config.notchVisible, false, "Notch is hidden when idle and alwaysOn is false");
+                    assertEquals(Config.expanded, false, "Notch is not expanded");
+
+                    // Activate Always On
+                    Config.alwaysOn = true;
+                    assertEquals(Config.notchVisible, true, "Always On keeps notch visible when idle");
+                    assertEquals(Config.expanded, false, "Always On keeps notch strictly in compact glance mode (not expanded)");
+
+                    // Open Deck
+                    Config.isDeckOpen = true;
+                    assertEquals(Config.expanded, true, "Clicking notch with alwaysOn expands full deck");
+
+                    // Switch to Settings card (index 5)
+                    Config.galleryIndex = 5;
+                    assertEquals(Config.galleryIndex, 5, "Settings card index 5 is selectable");
+
+                    // Instantiate SettingsDeckCard
+                    let comp = Qt.createComponent("modules/SettingsDeckCard.qml");
+                    if (comp.status === Component.Error) {
+                        console.error("Settings Deck Error: " + comp.errorString());
+                    }
+                    assertEquals(comp.status, Component.Ready, "SettingsDeckCard compiles cleanly");
+                    let settingsCard = comp.createObject(testRoot);
+                    assertTrue(settingsCard !== null, "SettingsDeckCard created successfully");
+                    assertEquals(settingsCard.implicitWidth, 520, "Settings card width is 520px");
+                    assertEquals(settingsCard.implicitHeight, 96, "Settings card height is 96px");
+                    settingsCard.destroy();
+
+                    // Close Deck
+                    Config.isDeckOpen = false;
+                    assertEquals(Config.expanded, false, "Closing deck returns to compact mode");
+                    assertEquals(Config.notchVisible, true, "Notch still visible because alwaysOn is true");
+
+                    // Turn off Always On
+                    Config.alwaysOn = false;
+                    assertEquals(Config.notchVisible, false, "Turning off alwaysOn allows notch to auto-hide when idle");
+                }
             }
         ];
 

@@ -76,9 +76,12 @@ Item {
     property real appMenuX: 0
     property bool appMenuVisible: false
 
-    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, tray menu active, or app menu active
+    // Always On Notch State: keeps notch permanently visible in compact glance mode without expanding
+    property bool alwaysOn: false
+
+    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, tray menu active, app menu active, power event active, or alwaysOn
     property bool notchHovered: false
-    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen || isPowerEventActive
+    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen || isPowerEventActive || alwaysOn
     readonly property bool expanded: isPinned || isDeckOpen || powerModalVisible || trayMenuVisible || appMenuVisible
 
     // Notch Anchor Mode: "auto", "top", or "bottom"

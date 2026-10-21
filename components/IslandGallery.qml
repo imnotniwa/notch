@@ -12,8 +12,8 @@ Item {
     readonly property var tabModel: [
         { name: "Media", icon: "" },
         { name: "Spaces", icon: "" },
-        { name: "Hardware", icon: "󰍛" },
-        { name: "Control", icon: "󰒓" },
+        { name: "Hardware", icon: "󰘚" },
+        { name: "Control", icon: "󰕰" },
         { name: "Tray", icon: "󰀻" }
     ]
 
@@ -147,6 +147,19 @@ Item {
                 }
             }
 
+            // Settings Card shortcut (cog icon on the right)
+            IslandButton {
+                icon: "󰒓"
+                active: Config.galleryIndex === 5
+                onClicked: {
+                    if (Config.galleryIndex === 5) {
+                        Config.galleryIndex = 0;
+                    } else {
+                        Config.galleryIndex = 5;
+                    }
+                }
+            }
+
             // Power Settings shortcut
             IslandButton {
                 icon: ""
@@ -184,6 +197,7 @@ Item {
             HardwareDeckCard {}
             ControlDeckCard {}
             TrayDeckCard {}
+            SettingsDeckCard {}
         }
     }
 }
