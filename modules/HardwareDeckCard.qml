@@ -48,19 +48,36 @@ Item {
         path: "/sys/class/thermal/thermal_zone0/temp"
     }
 
-    FileView {
-        id: batCap
-        path: "/sys/class/power_supply/BAT0/capacity"
-    }
+    // Live sysfs battery process query to prevent virtual filesystem caching
+    Process {
+        id: batQueryProc
+        command: ["sh", "-c", "cat /sys/class/power_supply/BAT*/capacity 2>/dev/null; echo '---'; cat /sys/class/power_supply/BAT*/status 2>/dev/null; echo '---'; cat /sys/class/power_supply/BAT*/power_now 2>/dev/null"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                let raw = this.text.trim();
+                if (!raw) return;
+                let sections = raw.split("---");
+                if (sections.length < 3) return;
 
-    FileView {
-        id: batStat
-        path: "/sys/class/power_supply/BAT0/status"
-    }
+                let cap = parseInt(sections[0].trim().split("\n")[0]);
+                let stat = sections[1].trim().split("\n")[0];
+                let pwr = parseInt(sections[2].trim().split("\n")[0]);
 
-    FileView {
-        id: batPower
-        path: "/sys/class/power_supply/BAT0/power_now"
+                if (!isNaN(cap)) {
+                    root.batFraction = Math.max(0, Math.min(1, cap / 100));
+                }
+                if (stat) {
+                    root.batStatusText = stat;
+                    root.batIsCharging = (stat === "Charging");
+                }
+                if (!isNaN(pwr) && pwr > 0) {
+                    let watts = (pwr / 1000000).toFixed(1);
+                    root.batWattageText = watts + "W";
+                } else {
+                    root.batWattageText = "";
+                }
+            }
+        }
     }
 
     // Process for disk space calculation
@@ -154,23 +171,7 @@ Item {
     }
 
     function updateBattery() {
-        let cap = parseInt(batCap.text().trim());
-        let stat = batStat.text().trim();
-        if (!isNaN(cap)) {
-            root.batFraction = Math.max(0, Math.min(1, cap / 100));
-        }
-        if (stat) {
-            root.batStatusText = stat;
-            root.batIsCharging = (stat === "Charging");
-        }
-
-        let pwr = parseInt(batPower.text().trim());
-        if (!isNaN(pwr) && pwr > 0) {
-            let watts = (pwr / 1000000).toFixed(1);
-            root.batWattageText = watts + "W";
-        } else {
-            root.batWattageText = "";
-        }
+        batQueryProc.running = true;
     }
 
     Timer {
@@ -414,10 +415,18 @@ Item {
                     RowLayout {
                         spacing: 5
                         Text {
-                            text: root.batIsCharging ? "" : (root.batFraction <= 0.15 ? "󰂎" : (root.batFraction <= 0.5 ? "󰁾" : "󰁹"))
+                            text: root.batIsCharging ? "󱐋" : (root.batFraction <= 0.15 ? "󰂎" : (root.batFraction <= 0.5 ? "󰁾" : "󰁹"))
                             font.family: Config.iconFont
                             font.pixelSize: 13
-                            color: root.batIsCharging ? Config.actFg : (root.batFraction <= 0.15 ? Config.danger : Config.mainFg)
+                            color: root.batIsCharging ? Config.success : (root.batFraction <= 0.15 ? Config.danger : Config.mainFg)
+
+                            // Subtle breathing pulse on the lightning bolt while charging
+                            SequentialAnimation on opacity {
+                                running: root.batIsCharging
+                                loops: Animation.Infinite
+                                NumberAnimation { to: 0.55; duration: 900; easing.type: Easing.InOutSine }
+                                NumberAnimation { to: 1.0; duration: 900; easing.type: Easing.InOutSine }
+                            }
                         }
                         Text {
                             text: "Battery"
@@ -434,7 +443,7 @@ Item {
                         text: (root.batWattageText !== "" ? (root.batWattageText + " • ") : "") + root.batStatusText
                         font.family: Config.bodyFont
                         font.pixelSize: 10
-                        color: root.batIsCharging ? Config.actFg : Qt.rgba(1, 1, 1, 0.6)
+                        color: root.batIsCharging ? Config.success : Qt.rgba(1, 1, 1, 0.6)
                     }
 
                     Text {
@@ -442,7 +451,7 @@ Item {
                         font.family: Config.monoFont
                         font.pixelSize: 11
                         font.weight: Font.Bold
-                        color: Config.mainFg
+                        color: root.batIsCharging ? Config.success : Config.mainFg
                     }
                 }
 
@@ -460,10 +469,10 @@ Item {
                         width: Math.max(4, parent.width * root.batFraction)
                         radius: 2.5
                         color: {
-                            if (root.batIsCharging) return Config.actFg;
+                            if (root.batIsCharging) return Config.success;
                             if (root.batFraction <= 0.15) return Config.danger;
                             if (root.batFraction <= 0.30) return Config.warning;
-                            return Config.actFg;
+                            return Config.success;
                         }
 
                         Behavior on width {
