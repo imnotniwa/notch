@@ -43,10 +43,9 @@ Rectangle {
 
     // Flush bezel seam cover: eliminates any sub-pixel gap or light leak with the active bezel
     Rectangle {
-        anchors.top: root.isBottomAnchor ? undefined : parent.top
-        anchors.bottom: root.isBottomAnchor ? parent.bottom : undefined
         anchors.left: parent.left
         anchors.right: parent.right
+        y: root.isBottomAnchor ? (parent.height - 2) : 0
         height: 2
         color: Config.islandBg
         z: 2

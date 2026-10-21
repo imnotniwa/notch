@@ -29,6 +29,12 @@ ShellRoot {
                     if (visible) Config.activeAnchorEdge = anchorEdge;
                 }
 
+                onAnchorEdgeChanged: {
+                    if (visible) {
+                        Config.activeAnchorEdge = anchorEdge;
+                    }
+                }
+
                 onVisibleChanged: {
                     if (visible) {
                         Config.activeAnchorEdge = anchorEdge;
@@ -72,9 +78,8 @@ ShellRoot {
                 // Bezel Edge Hotspot: catches mouse hovering along the anchor bezel centered with the island
                 Item {
                     id: edgeTrigger
-                    anchors.top: barWindow.isBottomAnchor ? undefined : parent.top
-                    anchors.bottom: barWindow.isBottomAnchor ? parent.bottom : undefined
                     anchors.horizontalCenter: parent.horizontalCenter
+                    y: barWindow.isBottomAnchor ? (parent.height - height) : 0
                     width: island.implicitWidth
                     height: 8
 
