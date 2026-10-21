@@ -8,6 +8,8 @@ import ".."
 Item {
     id: root
 
+    property bool compactMode: false
+
     // Find the first active player (or first playing player)
     readonly property var activePlayer: {
         if (!Mpris.players || Mpris.players.values.length === 0) return null;
@@ -180,6 +182,7 @@ Item {
             // Previous
             Rectangle {
                 id: prevBtn
+                visible: !root.compactMode
                 implicitWidth: 24
                 implicitHeight: 24
                 radius: 12
@@ -273,6 +276,7 @@ Item {
             // Next
             Rectangle {
                 id: nextBtn
+                visible: !root.compactMode
                 implicitWidth: 24
                 implicitHeight: 24
                 radius: 12

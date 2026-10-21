@@ -316,6 +316,45 @@ Item {
                     Config.activeAppWindow = null;
                     assertEquals(Config.notchVisible, false, "Notch closes when app menu is dismissed");
                 }
+            },
+            {
+                name: "Two-Tier Notch Hierarchy: Hover Compact vs Click Full Deck",
+                fn: function() {
+                    // 1. Idle state
+                    Config.notchHovered = false;
+                    Config.isHovered = false;
+                    Config.isDeckOpen = false;
+                    Config.isPinned = false;
+                    assertEquals(Config.notchVisible, false, "Notch hidden at idle");
+                    assertEquals(Config.expanded, false, "Deck collapsed at idle");
+
+                    // 2. Cursor enters bezel: Compact Glance triggers
+                    Config.notchHovered = true;
+                    Config.isHovered = true;
+                    assertEquals(Config.notchVisible, true, "Notch visible on hover");
+                    assertEquals(Config.expanded, false, "Full Deck remains collapsed on hover (Compact Glance mode)");
+
+                    // 3. User clicks island body to open Full Deck
+                    Config.isDeckOpen = true;
+                    assertEquals(Config.notchVisible, true, "Notch visible when deck is open");
+                    assertEquals(Config.expanded, true, "Full Deck expands on click");
+
+                    // 4. User clicks again to collapse back to Compact Glance
+                    Config.isDeckOpen = false;
+                    assertEquals(Config.notchVisible, true, "Notch still visible while hovering");
+                    assertEquals(Config.expanded, false, "Deck collapsed back to Compact Glance");
+
+                    // 5. Pin keeps Full Deck open
+                    Config.isPinned = true;
+                    assertEquals(Config.expanded, true, "Pin keeps Full Deck open");
+                    Config.isPinned = false;
+                    assertEquals(Config.expanded, false, "Unpin restores compact state");
+
+                    // 6. Cursor leaves notch: auto-collapses
+                    Config.notchHovered = false;
+                    Config.isHovered = false;
+                    assertEquals(Config.notchVisible, false, "Notch auto-hides when cursor leaves");
+                }
             }
         ];
 

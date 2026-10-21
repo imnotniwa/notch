@@ -9,6 +9,8 @@ import ".."
 Item {
     id: root
 
+    property bool compactMode: false
+
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
@@ -125,6 +127,7 @@ Item {
 
         // Memory
         IslandButton {
+            visible: !root.compactMode
             icon: "󰾆"
             text: root.memUsage
             tooltip: "Memory Used: " + root.memUsage
@@ -141,7 +144,7 @@ Item {
 
         // GPU Info Temp
         IslandButton {
-            visible: root.gpuTemp !== ""
+            visible: !root.compactMode && root.gpuTemp !== ""
             text: root.gpuTemp
             tooltip: "GPU Info (Click to toggle)"
             isMonoFont: true

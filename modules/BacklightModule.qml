@@ -40,7 +40,7 @@ Item {
     Timer {
         interval: 1500
         repeat: true
-        running: Config.expanded
+        running: Config.notchVisible
         triggeredOnStart: true
         onTriggered: root.refreshBrightness()
     }

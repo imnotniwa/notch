@@ -20,7 +20,7 @@ Item {
     Timer {
         interval: 1000
         repeat: true
-        running: Config.expanded
+        running: Config.notchVisible
         triggeredOnStart: true
         onTriggered: root.updateTime()
     }

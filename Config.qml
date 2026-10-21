@@ -45,6 +45,7 @@ Item {
     // Global Interactive States
     property bool isPinned: false
     property bool isHovered: false
+    property bool isDeckOpen: false
     property bool manualExpand: false
     property bool powerModalVisible: false
     property string activeAnchorEdge: "top"
@@ -62,8 +63,8 @@ Item {
 
     // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, tray menu active, or app menu active
     property bool notchHovered: false
-    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible
-    readonly property bool expanded: notchVisible
+    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen
+    readonly property bool expanded: isPinned || isDeckOpen || powerModalVisible || trayMenuVisible || appMenuVisible
 
     // Notch Anchor Mode: "auto", "top", or "bottom"
     // "auto": intelligently detects if another monitor is stacked above this monitor.

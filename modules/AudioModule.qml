@@ -8,6 +8,8 @@ import ".."
 Item {
     id: root
 
+    property bool compactMode: false
+
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
@@ -60,6 +62,7 @@ Item {
 
         // Microphone Button
         IslandButton {
+            visible: !root.compactMode
             icon: root.micIcon
             tooltip: (root.micMuted ? "Mic Muted" : "Mic Active") + " (Middle: Mute toggle, Scroll: Gain)"
             active: root.micMuted
