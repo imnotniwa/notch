@@ -432,6 +432,109 @@ Item {
                     Config.isDeckOpen = false;
                     assertEquals(Config.expanded, false, "Toggling closes Tier 2 deck");
                 }
+            },
+            {
+                name: "Hardware Telemetry Deck Card Bounds and Data Formats",
+                fn: function() {
+                    let hwComponent = Qt.createComponent("modules/HardwareDeckCard.qml");
+                    if (hwComponent.status === Component.Error) {
+                        console.error("Component error: " + hwComponent.errorString());
+                    }
+                    assertEquals(hwComponent.status, Component.Ready, "HardwareDeckCard component compiles cleanly");
+
+                    let hwCard = hwComponent.createObject(testRoot);
+                    assertTrue(hwCard !== null && hwCard !== undefined, "HardwareDeckCard instantiates without error");
+
+                    // Validate default dimensions fitting the 520x96 deck slot
+                    assertEquals(hwCard.implicitWidth, 520, "Hardware card width matches deck width");
+                    assertEquals(hwCard.implicitHeight, 96, "Hardware card height matches deck height");
+
+                    // Validate telemetry properties & bounds
+                    assertTrue(hwCard.cpuFraction >= 0.0 && hwCard.cpuFraction <= 1.0, "CPU fraction within [0, 1]");
+                    assertTrue(hwCard.memFraction >= 0.0 && hwCard.memFraction <= 1.0, "Memory fraction within [0, 1]");
+                    assertTrue(hwCard.batFraction >= 0.0 && hwCard.batFraction <= 1.0, "Battery fraction within [0, 1]");
+                    assertTrue(hwCard.diskFraction >= 0.0 && hwCard.diskFraction <= 1.0, "Disk fraction within [0, 1]");
+
+                    // Test updates
+                    hwCard.updateCpu();
+                    hwCard.updateMem();
+                    hwCard.updateBattery();
+
+                    assertTrue(hwCard.cpuUsageText.indexOf("%") !== -1, "CPU usage formatted as percentage string");
+                    assertTrue(hwCard.memPercentText.indexOf("%") !== -1, "Memory formatted as percentage string");
+
+                    hwCard.destroy();
+                }
+            },
+            {
+                name: "Spaces Deck Card Compilation & Mission Control Architecture",
+                fn: function() {
+                    let spacesComponent = Qt.createComponent("modules/SpacesDeckCard.qml");
+                    if (spacesComponent.status === Component.Error) {
+                        console.error("Spaces Deck Error: " + spacesComponent.errorString());
+                    }
+                    assertEquals(spacesComponent.status, Component.Ready, "SpacesDeckCard component compiles cleanly");
+
+                    let spacesCard = spacesComponent.createObject(testRoot);
+                    assertTrue(spacesCard !== null && spacesCard !== undefined, "SpacesDeckCard instantiates without error");
+
+                    // Check dimensions matching Tier 2 slot
+                    assertEquals(spacesCard.implicitWidth, 520, "Spaces card width matches deck width");
+                    assertEquals(spacesCard.implicitHeight, 96, "Spaces card height matches deck height");
+
+                    // Test spaces data refreshing
+                    spacesCard.refreshSpacesData();
+                    assertTrue(spacesCard.activeWsId !== undefined && spacesCard.activeWsId !== null, "Active workspace ID is tracked");
+                    assertTrue(Array.isArray(spacesCard.activeSpaceWindows), "Active space windows is an array");
+
+                    spacesCard.destroy();
+                }
+            },
+            {
+                name: "Control Deck Card Option A Modular Tiles Architecture",
+                fn: function() {
+                    let ctrlComponent = Qt.createComponent("modules/ControlDeckCard.qml");
+                    assertEquals(ctrlComponent.status, Component.Ready, "ControlDeckCard compiles cleanly");
+
+                    let ctrlCard = ctrlComponent.createObject(testRoot);
+                    assertTrue(ctrlCard !== null && ctrlCard !== undefined, "ControlDeckCard instantiates without error");
+
+                    // Validate slot geometry
+                    assertEquals(ctrlCard.implicitWidth, 520, "Control card width is 520px");
+                    assertEquals(ctrlCard.implicitHeight, 96, "Control card height is 96px");
+
+                    // Validate telemetry properties
+                    assertTrue(ctrlCard.volumePct >= 0 && ctrlCard.volumePct <= 150, "Volume bounded");
+                    assertTrue(ctrlCard.brightnessPct >= 0 && ctrlCard.brightnessPct <= 100, "Brightness bounded");
+
+                    ctrlCard.destroy();
+                }
+            },
+            {
+                name: "Interactive Charging Power Event Notification Lifecycle",
+                fn: function() {
+                    // Test initial state
+                    Config.isPowerEventActive = false;
+                    assertEquals(Config.isPowerEventActive, false, "Power event initially idle");
+
+                    // Trigger plug connect
+                    Config.powerEventIcon = "󱐋";
+                    Config.powerEventColor = Config.success;
+                    Config.powerEventMessage = "Charging 80%";
+                    Config.isPowerEventActive = true;
+
+                    // Notch must automatically expand into view even if cursor is not hovering
+                    assertTrue(Config.notchVisible, "Notch reveals itself dynamically on AC power connection");
+
+                    // Trigger unplug
+                    Config.powerEventIcon = "󰂎";
+                    Config.powerEventColor = Config.warning;
+                    Config.powerEventMessage = "On Battery 79%";
+                    assertTrue(Config.isPowerEventActive, "Unplug event active");
+
+                    // Reset
+                    Config.isPowerEventActive = false;
+                }
             }
         ];
 

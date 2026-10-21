@@ -14,10 +14,12 @@ Rectangle {
     // Media stays active when playing OR when paused while the notch remains in focus/hovered
     readonly property bool mediaActiveOrHoverPaused: compactMedia.hasMedia && (compactMedia.isPlaying || (Config.notchVisible && compactMedia.title !== ""))
     readonly property bool hasActiveMedia: mediaActiveOrHoverPaused
+    readonly property bool isPowerBanner: Config.isPowerEventActive && !isExpanded
+    readonly property int powerBannerWidth: 260
     readonly property int standardCompactWidth: Math.max(compactRow.implicitWidth + 32, 280)
     readonly property int compactMediaWidth: Math.max(compactMediaPill.implicitWidth + 32, 490)
 
-    implicitWidth: isExpanded ? Config.deckWidth : (hasActiveMedia ? compactMediaWidth : standardCompactWidth)
+    implicitWidth: isExpanded ? Config.deckWidth : (isPowerBanner ? powerBannerWidth : (hasActiveMedia ? compactMediaWidth : standardCompactWidth))
     implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
 
     Behavior on implicitWidth {
@@ -111,8 +113,8 @@ Rectangle {
         id: compactRow
         anchors.centerIn: parent
         spacing: 12
-        visible: !root.isExpanded && !root.hasActiveMedia
-        opacity: (!root.isExpanded && !root.hasActiveMedia) ? 1.0 : 0.0
+        visible: !root.isExpanded && !root.hasActiveMedia && !root.isPowerBanner
+        opacity: (!root.isExpanded && !root.hasActiveMedia && !root.isPowerBanner) ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
@@ -143,11 +145,54 @@ Rectangle {
     CompactMediaPill {
         id: compactMediaPill
         anchors.centerIn: parent
-        visible: !root.isExpanded && root.hasActiveMedia
-        opacity: (!root.isExpanded && root.hasActiveMedia) ? 1.0 : 0.0
+        visible: !root.isExpanded && root.hasActiveMedia && !root.isPowerBanner
+        opacity: (!root.isExpanded && root.hasActiveMedia && !root.isPowerBanner) ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        }
+    }
+
+    // =========================================================================
+    // DYNAMIC ISLAND TRANSIENT POWER BANNER (Apple iOS/macOS Charging Notification)
+    // =========================================================================
+    RowLayout {
+        id: powerBannerRow
+        anchors.centerIn: parent
+        spacing: 10
+        visible: !root.isExpanded && root.isPowerBanner
+        opacity: (!root.isExpanded && root.isPowerBanner) ? 1.0 : 0.0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        }
+
+        // Animated connection ring / pulse icon
+        Rectangle {
+            implicitWidth: 26
+            implicitHeight: 26
+            radius: 13
+            color: Qt.rgba(Config.powerEventColor.r, Config.powerEventColor.g, Config.powerEventColor.b, 0.20)
+            border.color: Config.powerEventColor
+            border.width: 1
+            Layout.alignment: Qt.AlignVCenter
+
+            Text {
+                anchors.centerIn: parent
+                text: Config.powerEventIcon
+                font.family: Config.iconFont
+                font.pixelSize: 13
+                color: Config.powerEventColor
+            }
+        }
+
+        Text {
+            text: Config.powerEventMessage
+            font.family: Config.bodyFont
+            font.pixelSize: 12
+            font.weight: Font.DemiBold
+            color: Config.mainFg
+            Layout.alignment: Qt.AlignVCenter
         }
     }
 

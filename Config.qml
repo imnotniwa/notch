@@ -6,6 +6,9 @@ Item {
     // Apple San Francisco / System Font with monospace fallbacks for clean typography
     readonly property string fontFamily: "SF Pro Text, -apple-system, BlinkMacSystemFont, 'Inter', 'JetBrainsMono Nerd Font', sans-serif"
     readonly property string monoFontFamily: "SF Mono, 'JetBrainsMono Nerd Font', 'Fira Code', monospace"
+    readonly property string iconFont: "JetBrainsMono Nerd Font, 'Symbols Nerd Font', sans-serif"
+    readonly property string bodyFont: fontFamily
+    readonly property string monoFont: monoFontFamily
     readonly property int fontSize: 11
     readonly property int iconSize: 13
     
@@ -61,6 +64,13 @@ Item {
     property real trayMenuY: 0
     property bool trayMenuVisible: false
 
+    // Power Connection Transient Event Banner (Apple Dynamic Island Style)
+    property bool isPowerEventActive: false
+    property bool lastAcOnline: true
+    property string powerEventMessage: ""
+    property string powerEventIcon: "󱐋"
+    property color powerEventColor: "#34c759"
+
     // App Taskbar Context Menu State
     property var activeAppWindow: null
     property real appMenuX: 0
@@ -68,7 +78,7 @@ Item {
 
     // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, tray menu active, or app menu active
     property bool notchHovered: false
-    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen
+    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen || isPowerEventActive
     readonly property bool expanded: isPinned || isDeckOpen || powerModalVisible || trayMenuVisible || appMenuVisible
 
     // Notch Anchor Mode: "auto", "top", or "bottom"

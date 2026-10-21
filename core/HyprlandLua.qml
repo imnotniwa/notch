@@ -32,6 +32,35 @@ Item {
         Config.run("hyprctl dispatch '(function() for _, w in ipairs(hl.get_windows()) do if string.lower(tostring(w.address)) == string.lower(\"" + addr + "\") then return hl.dsp.window.close({window = w}) end end end)()'");
     }
 
+    function toggleFloatWindow(addr) {
+        if (!addr) return;
+        Config.run("hyprctl dispatch '(function() for _, w in ipairs(hl.get_windows()) do if string.lower(tostring(w.address)) == string.lower(\"" + addr + "\") then return hl.dsp.window.float({window = w}) end end end)()'");
+    }
+
+    function toggleSpecialWorkspace() {
+        Config.run("hyprctl dispatch 'hl.dsp.workspace.toggle_special({})'");
+    }
+
+    function launchApp() {
+        Config.run("hyprctl dispatch 'hl.dsp.exec_cmd(\"rofi -show drun || wofi --show drun || fuzzel\")'");
+    }
+
+    function pickColor() {
+        Config.run("hyprpicker -a");
+    }
+
+    function screenshot() {
+        Config.run("grim -g \"$(slurp)\" - | wl-copy || hyde-shell screenshot --area");
+    }
+
+    function toggleBluetooth() {
+        Config.run("bluetoothctl show | grep -q 'Powered: yes' && bluetoothctl power off || bluetoothctl power on");
+    }
+
+    function openBluetoothManager() {
+        Config.run("blueman-manager || blueberry || hyprctl dispatch exec [float] blueman-manager");
+    }
+
     function lock() {
         Config.run("hyprlock");
     }
