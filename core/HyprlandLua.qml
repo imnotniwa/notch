@@ -16,16 +16,20 @@ Item {
 
     function focusWindow(addr) {
         if (!addr) return;
-        Config.run("hyprctl dispatch 'hl.dsp.focus({window=\"address:" + addr + "\"})'");
+        Config.run("hyprctl dispatch '(function() for _, w in ipairs(hl.get_windows()) do if string.lower(tostring(w.address)) == string.lower(\"" + addr + "\") then return hl.dsp.focus({window = w}) end end end)()'");
     }
 
-    function fullscreenWindow() {
-        Config.run("hyprctl dispatch 'hl.dsp.window.fullscreen({})'");
+    function fullscreenWindow(addr) {
+        if (!addr) {
+            Config.run("hyprctl dispatch 'hl.dsp.window.fullscreen({})'");
+            return;
+        }
+        Config.run("hyprctl dispatch '(function() for _, w in ipairs(hl.get_windows()) do if string.lower(tostring(w.address)) == string.lower(\"" + addr + "\") then return hl.dsp.window.fullscreen({window = w}) end end end)()'");
     }
 
     function closeWindow(addr) {
         if (!addr) return;
-        Config.run("hyprctl dispatch 'hl.dsp.window.close({address=\"" + addr + "\"})'");
+        Config.run("hyprctl dispatch '(function() for _, w in ipairs(hl.get_windows()) do if string.lower(tostring(w.address)) == string.lower(\"" + addr + "\") then return hl.dsp.window.close({window = w}) end end end)()'");
     }
 
     function lock() {

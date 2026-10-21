@@ -107,23 +107,36 @@ Item {
                     id: mouse
                     anchors.fill: parent
                     hoverEnabled: true
-                    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     cursorShape: Qt.PointingHandCursor
 
                     onClicked: (evt) => {
                         if (evt.button === Qt.LeftButton) {
+                            if (Config.appMenuVisible) Config.appMenuVisible = false;
                             HyprlandLua.focusWindow(taskItem.modelData.address);
                         } else if (evt.button === Qt.RightButton) {
-                            HyprlandLua.fullscreenWindow();
-                        } else if (evt.button === Qt.MiddleButton) {
-                            HyprlandLua.closeWindow(taskItem.modelData.address);
+                            let pt = taskItem.mapToItem(null, 0, 0);
+                            let targetX = Math.round(pt.x - 20);
+
+                            if (Config.appMenuVisible && Config.activeAppWindow === taskItem.modelData) {
+                                Config.appMenuVisible = false;
+                                Config.activeAppWindow = null;
+                            } else {
+                                Config.appMenuX = targetX;
+                                Config.activeAppWindow = {
+                                    address: taskItem.modelData.address,
+                                    title: taskItem.windowTitle,
+                                    appClass: taskItem.appClass
+                                };
+                                Config.appMenuVisible = true;
+                            }
                         }
                     }
                 }
 
                 StyledTooltip {
                     text: taskItem.windowTitle
-                    visible: mouse.containsMouse && !taskItem.isActive
+                    visible: mouse.containsMouse && !taskItem.isActive && !Config.appMenuVisible
                     anchors.horizontalCenter: taskItem.horizontalCenter
                     y: Config.activeAnchorEdge === "bottom" ? (-height - 8) : (taskItem.height + 8)
                 }

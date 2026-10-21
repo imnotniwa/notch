@@ -55,9 +55,14 @@ Item {
     property real trayMenuY: 0
     property bool trayMenuVisible: false
 
-    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, or tray menu active
+    // App Taskbar Context Menu State
+    property var activeAppWindow: null
+    property real appMenuX: 0
+    property bool appMenuVisible: false
+
+    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, tray menu active, or app menu active
     property bool notchHovered: false
-    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible
+    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible
     readonly property bool expanded: notchVisible
 
     // Notch Anchor Mode: "auto", "top", or "bottom"

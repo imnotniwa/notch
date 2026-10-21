@@ -116,6 +116,18 @@ ShellRoot {
         }
     }
 
+    // Apple-style Taskbar App Context Menu Window per screen
+    Variants {
+        model: Config.appMenuVisible ? Quickshell.screens : []
+        delegate: Component {
+            AppContextMenu {
+                required property var modelData
+                screen: modelData
+                visible: modelData.name === activeMonitorName && Config.appMenuVisible
+            }
+        }
+    }
+
     // Centered Modal Window per screen (only created when powerModalVisible is true)
     Variants {
         model: Config.powerModalVisible ? Quickshell.screens : []

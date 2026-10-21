@@ -296,6 +296,26 @@ Item {
                     Config.activeAnchorEdge = "bottom";
                     assertTrue(tip.y + tip.height <= 0, "Tooltip flipped upward above button when edge set to bottom");
                 }
+            },
+            {
+                name: "Taskbar App Menu Interaction & Notch Visibility Test",
+                fn: function() {
+                    // Start idle
+                    Config.appMenuVisible = false;
+                    Config.trayMenuVisible = false;
+                    Config.notchHovered = false;
+                    assertEquals(Config.notchVisible, false, "Notch is hidden when idle");
+
+                    // Trigger app menu on right click
+                    Config.activeAppWindow = { address: "0x1234", title: "Test App", appClass: "test" };
+                    Config.appMenuVisible = true;
+                    assertEquals(Config.notchVisible, true, "Notch stays expanded when taskbar app menu is open");
+
+                    // Close app menu
+                    Config.appMenuVisible = false;
+                    Config.activeAppWindow = null;
+                    assertEquals(Config.notchVisible, false, "Notch closes when app menu is dismissed");
+                }
             }
         ];
 
