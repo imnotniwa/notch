@@ -51,6 +51,10 @@ Item {
     IslandButton {
         id: btn
         icon: root.icon
-        tooltip: root.isConnected ? "Connected to " + root.ssid : "Network Disconnected"
+        text: root.isConnected ? root.ssid : "Disconnected"
+        tooltip: root.isConnected ? "Connected to " + root.ssid + " (Click for Settings)" : "Network Disconnected (Click for Settings)"
+        onClicked: {
+            Config.run("nm-connection-editor || nmtui || nm-applet");
+        }
     }
 }

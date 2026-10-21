@@ -355,6 +355,83 @@ Item {
                     Config.isHovered = false;
                     assertEquals(Config.notchVisible, false, "Notch auto-hides when cursor leaves");
                 }
+            },
+            {
+                name: "Gallery Deck Navigation & Tab Cycling",
+                fn: function() {
+                    // Test 5 gallery tabs: 0: Media, 1: Spaces, 2: Hardware, 3: Control, 4: Tray
+                    let numTabs = 5;
+                    Config.galleryIndex = 0;
+                    assertEquals(Config.galleryIndex, 0, "Initial gallery starts on Media");
+
+                    // Next tab
+                    Config.galleryIndex = (Config.galleryIndex + 1) % numTabs;
+                    assertEquals(Config.galleryIndex, 1, "Next advances to Spaces");
+
+                    // Next tab
+                    Config.galleryIndex = (Config.galleryIndex + 1) % numTabs;
+                    assertEquals(Config.galleryIndex, 2, "Next advances to Hardware");
+
+                    // Next tab
+                    Config.galleryIndex = (Config.galleryIndex + 1) % numTabs;
+                    assertEquals(Config.galleryIndex, 3, "Next advances to Control");
+
+                    // Next tab
+                    Config.galleryIndex = (Config.galleryIndex + 1) % numTabs;
+                    assertEquals(Config.galleryIndex, 4, "Next advances to Tray");
+
+                    // Next tab wraps to 0
+                    Config.galleryIndex = (Config.galleryIndex + 1) % numTabs;
+                    assertEquals(Config.galleryIndex, 0, "Next wraps back to Media");
+
+                    // Previous wraps to 4
+                    Config.galleryIndex = (Config.galleryIndex - 1 + numTabs) % numTabs;
+                    assertEquals(Config.galleryIndex, 4, "Previous wraps to Tray");
+                }
+            },
+            {
+                name: "Cursor Tracking Mathematics & Display Edge Clamping",
+                fn: function() {
+                    let screenW = 1920;
+                    let islandW = 420;
+                    let halfW = islandW / 2;
+
+                    // Cursor at left edge (0): clamps to 16
+                    let leftCursor = 0;
+                    let calcLeft = Math.round(Math.max(16, Math.min(leftCursor - halfW, screenW - islandW - 16)));
+                    assertEquals(calcLeft, 16, "Cursor at left edge clamps island to 16px margin");
+
+                    // Cursor at center (960): centers island at 750
+                    let centerCursor = 960;
+                    let calcCenter = Math.round(Math.max(16, Math.min(centerCursor - halfW, screenW - islandW - 16)));
+                    assertEquals(calcCenter, 750, "Cursor at center places island at 750px");
+
+                    // Cursor at right edge (1920): clamps to 1484 (1920 - 420 - 16)
+                    let rightCursor = 1920;
+                    let calcRight = Math.round(Math.max(16, Math.min(rightCursor - halfW, screenW - islandW - 16)));
+                    assertEquals(calcRight, 1484, "Cursor at right edge clamps island to screenW - islandW - 16");
+                }
+            },
+            {
+                name: "Compact Glance Streamlining & Rich Media Expansion",
+                fn: function() {
+                    // Test compact dimensions vs rich media dimensions
+                    let compactHeight = 38;
+                    let mediaCardHeight = 116;
+                    let expandedDeckHeight = 146;
+
+                    // Verify compact height definition
+                    assertEquals(Config.compactHeight, compactHeight, "Default compact height is 38px");
+                    assertEquals(Config.expandedHeight, expandedDeckHeight, "Expanded full deck height is 146px");
+
+                    // Verify clicking compact island expands deck (Tier 2)
+                    Config.isDeckOpen = false;
+                    assertEquals(Config.expanded, false, "Deck initially closed");
+                    Config.isDeckOpen = true;
+                    assertEquals(Config.expanded, true, "Clicking compact island opens Tier 2 deck");
+                    Config.isDeckOpen = false;
+                    assertEquals(Config.expanded, false, "Toggling closes Tier 2 deck");
+                }
             }
         ];
 

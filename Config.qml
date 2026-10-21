@@ -9,9 +9,14 @@ Item {
     readonly property int fontSize: 11
     readonly property int iconSize: 13
     
-    readonly property int expandedHeight: 46
-    readonly property int pillRadius: 23
+    readonly property int compactHeight: 38
+    readonly property int expandedHeight: 146
+    readonly property int deckWidth: 560
+    readonly property int pillRadius: 24
     readonly property int innerPillRadius: 15
+
+    // Gallery Deck State (0: Media, 1: Workspaces/Apps, 2: Hardware/SysMon, 3: Control Center/Tray)
+    property int galleryIndex: 0
 
     // Apple Dynamic Island Material System
     // Pitch OLED black for seamless bezel integration

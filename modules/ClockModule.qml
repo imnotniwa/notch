@@ -5,16 +5,20 @@ import ".."
 Item {
     id: root
 
+    property bool compactMode: false
+
     implicitWidth: btn.implicitWidth
     implicitHeight: btn.implicitHeight
 
     property string timeStr: ""
     property string dateStr: ""
+    property string compactDateStr: ""
 
     function updateTime() {
         let now = new Date();
         root.timeStr = Qt.formatTime(now, "hh:mm:ss");
         root.dateStr = Qt.formatDate(now, "dddd, MMMM d, yyyy");
+        root.compactDateStr = Qt.formatDate(now, "ddd, MMM d");
     }
 
     Timer {
@@ -27,9 +31,9 @@ Item {
 
     IslandButton {
         id: btn
-        icon: ""
-        text: root.timeStr
-        tooltip: root.dateStr
+        icon: ""
+        text: root.timeStr + " • " + root.compactDateStr
+        tooltip: root.compactMode ? "" : root.dateStr
         isMonoFont: true
     }
 }

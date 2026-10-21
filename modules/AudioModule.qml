@@ -43,20 +43,28 @@ Item {
         IslandButton {
             icon: root.sinkIcon
             text: root.volumePct + "%"
-            tooltip: (root.isMuted ? "Muted" : "Volume: " + root.volumePct + "%") + " (Scroll: Adjust, Click: Pavucontrol, Middle: Mute)"
+            tooltip: root.compactMode ? "" : ((root.isMuted ? "Muted" : "Volume: " + root.volumePct + "%") + " (Scroll: Adjust, Click: Pavucontrol, Middle: Mute)")
             isMonoFont: true
 
             onClicked: {
-                Config.run("pavucontrol || pavucontrol-qt");
+                if (!root.compactMode) {
+                    Config.run("pavucontrol || pavucontrol-qt");
+                }
             }
             onMiddleClicked: {
-                Config.run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
+                if (!root.compactMode) {
+                    Config.run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle");
+                }
             }
             onScrolledUp: {
-                Config.run("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+");
+                if (!root.compactMode) {
+                    Config.run("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+");
+                }
             }
             onScrolledDown: {
-                Config.run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-");
+                if (!root.compactMode) {
+                    Config.run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-");
+                }
             }
         }
 

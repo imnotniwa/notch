@@ -61,10 +61,16 @@ Item {
     IslandButton {
         id: btn
         icon: root.icon
-        // In compact mode: always show percentage if not charged / discharging
-        text: (root.compactMode ? (root.isDischarging ? root.capacity + "%" : "") : root.capacity + "%")
+        // In compact mode: clearly indicate charging state ("Charging" or percentage with plug)
+        text: {
+            if (root.compactMode) {
+                if (root.isCharging) return "Charging " + root.capacity + "%";
+                return root.capacity + "%";
+            }
+            return (root.isCharging ? "Charging " : "") + root.capacity + "%";
+        }
         textColor: root.batteryColor
-        tooltip: "Battery: " + root.capacity + "% (" + root.status + ")"
+        tooltip: root.compactMode ? "" : ("Battery: " + root.capacity + "% (" + (root.isCharging ? "Charging" : root.status) + ")")
         isMonoFont: true
     }
 }

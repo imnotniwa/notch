@@ -10,9 +10,15 @@ Rectangle {
     readonly property bool isBottomAnchor: anchorEdge === "bottom"
     readonly property bool isExpanded: Config.expanded
 
-    // Symmetrical Dynamic Island geometry: morphs smoothly between compact and full deck
-    implicitWidth: isExpanded ? Math.max(expandedRow.implicitWidth + 36, 960) : Math.max(compactRow.implicitWidth + 32, 420)
-    implicitHeight: isExpanded ? Config.expandedHeight : 38
+    // Symmetrical Dynamic Island geometry: morphs smoothly between compact pill, compact media pill, and full deck gallery
+    // Media stays active when playing OR when paused while the notch remains in focus/hovered
+    readonly property bool mediaActiveOrHoverPaused: compactMedia.hasMedia && (compactMedia.isPlaying || (Config.notchVisible && compactMedia.title !== ""))
+    readonly property bool hasActiveMedia: mediaActiveOrHoverPaused
+    readonly property int standardCompactWidth: Math.max(compactRow.implicitWidth + 32, 280)
+    readonly property int compactMediaWidth: Math.max(compactMediaPill.implicitWidth + 32, 490)
+
+    implicitWidth: isExpanded ? Config.deckWidth : (hasActiveMedia ? compactMediaWidth : standardCompactWidth)
+    implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
 
     Behavior on implicitWidth {
         NumberAnimation {
@@ -91,151 +97,80 @@ Rectangle {
         }
     }
 
+    // Hidden media detector to track playback state
+    MediaModule {
+        id: compactMedia
+        visible: false
+        compactMode: true
+    }
+
     // =========================================================================
-    // TIER 2: COMPACT GLANCE BAR (Hover view: clean, centered, glanceable metrics)
+    // TIER 1: STREAMLINED COMPACT GLANCE BAR (Time & Date, Volume, Battery Charging Mode)
     // =========================================================================
     RowLayout {
         id: compactRow
         anchors.centerIn: parent
-        spacing: 10
-        visible: !root.isExpanded
-        opacity: !root.isExpanded ? 1.0 : 0.0
+        spacing: 12
+        visible: !root.isExpanded && !root.hasActiveMedia
+        opacity: (!root.isExpanded && !root.hasActiveMedia) ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
         }
 
-        // Left Glance: SysMon compact stats
-        RowLayout {
-            spacing: 6
+        // Time and Date
+        ClockModule {
+            compactMode: true
             Layout.alignment: Qt.AlignVCenter
-            SysMonModule {
-                compactMode: true
-            }
         }
 
-        // Center Glance: Clock & Media
-        RowLayout {
-            spacing: 6
+        // Volume
+        AudioModule {
+            compactMode: true
             Layout.alignment: Qt.AlignVCenter
-
-            ClockModule {}
-
-            MediaModule {
-                id: compactMedia
-                compactMode: true
-            }
-
-            TaskbarModule {
-                visible: !compactMedia.hasMedia
-            }
         }
 
-        // Right Glance: Volume & Battery
-        RowLayout {
-            spacing: 6
+        // Battery with clear charging status
+        BatteryModule {
+            compactMode: true
             Layout.alignment: Qt.AlignVCenter
-
-            AudioModule {
-                compactMode: true
-            }
-
-            BatteryModule {
-                compactMode: true
-            }
         }
     }
 
     // =========================================================================
-    // TIER 3: FULL DECK (Grouped 4-Card Rich Modular Layout)
+    // DYNAMIC APPLE COMPACT MEDIA PILL (Active when media is playing or paused-in-focus)
     // =========================================================================
-    RowLayout {
-        id: expandedRow
+    CompactMediaPill {
+        id: compactMediaPill
         anchors.centerIn: parent
-        spacing: 8
+        visible: !root.isExpanded && root.hasActiveMedia
+        opacity: (!root.isExpanded && root.hasActiveMedia) ? 1.0 : 0.0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        }
+    }
+
+    // =========================================================================
+    // TIER 2: FULL DECK GALLERY (Large Apple card with category tabs)
+    // =========================================================================
+    IslandGallery {
+        id: expandedGallery
+        anchors.fill: parent
+        anchors.margins: 12
         visible: root.isExpanded
         opacity: root.isExpanded ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
         }
+    }
 
-        // ----------------------------------------------------
-        // GROUP A: System & Workspaces (Left Wing)
-        // ----------------------------------------------------
-        IslandPill {
-            spacing: 6
-            WorkspacesModule {}
-            SysMonModule {
-                compactMode: false
-            }
-        }
-
-        // ----------------------------------------------------
-        // GROUP B: Center Core (Clock + Live Media + Taskbar)
-        // ----------------------------------------------------
-        IslandPill {
-            paddingHorizontal: 10
-            spacing: 8
-
-            ClockModule {}
-
-            MediaModule {
-                id: expandedMedia
-                compactMode: false
-            }
-
-            TaskbarModule {
-                visible: !expandedMedia.hasMedia
-            }
-        }
-
-        // ----------------------------------------------------
-        // GROUP C: Connectivity & Hardware Levels (Right Wing)
-        // ----------------------------------------------------
-        IslandPill {
-            spacing: 6
-            NetworkModule {}
-            AudioModule {
-                compactMode: false
-            }
-            BacklightModule {}
-            BatteryModule {
-                compactMode: false
-            }
-        }
-
-        // ----------------------------------------------------
-        // GROUP D: Control Center, Utilities, Tray & Power
-        // ----------------------------------------------------
-        IslandPill {
-            spacing: 4
-
-            // Utilities & Quick Actions
-            CaffeineModule {}
-            UpdatesModule {}
-            ActionsModule {}
-
-            // System Tray
-            TrayModule {
-                id: trayMod
-                visible: trayMod.implicitWidth > 0
-            }
-
-            // Quick Settings (Sunset, Lock, Power)
-            QuickSettingsModule {}
-
-            // Deck Pin Toggle
-            IslandButton {
-                icon: Config.isPinned ? "󰐃" : "󰤱"
-                tooltip: Config.isPinned ? "Unpin Dynamic Island" : "Pin Dynamic Island open"
-                active: Config.isPinned
-                onClicked: {
-                    Config.isPinned = !Config.isPinned;
-                    if (!Config.isPinned) {
-                        Config.isDeckOpen = false;
-                    }
-                }
+    // Auto-focus on Media tab if audio is playing when opening deck
+    onIsExpandedChanged: {
+        if (isExpanded) {
+            if (compactMedia.hasMedia && compactMedia.isPlaying) {
+                Config.galleryIndex = 0; // Media card focus (Reference 1)
             }
         }
     }
@@ -243,7 +178,9 @@ Rectangle {
     // Click anywhere on Island to toggle Full Deck
     MouseArea {
         anchors.fill: parent
-        z: -1 // Behind child buttons so child buttons get priority click events
+        // In compact mode, capture clicks across the whole bar so child items don't intercept it.
+        // In rich media / expanded deck, put z: -1 so child buttons (media transport, tabs, etc.) receive clicks.
+        z: (!root.isExpanded && !root.hasActiveMedia) ? 10 : -1
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             Config.isDeckOpen = !Config.isDeckOpen;

@@ -49,15 +49,23 @@ ShellRoot {
                 }
 
                 // Window height provides space for hanging/docked island and tooltips
-                implicitHeight: Config.expandedHeight + 46
+                implicitHeight: Config.expandedHeight + 64
                 color: "transparent"
 
                 // Zero exclusiveZone: Never resize, tile, or disturb application windows!
                 exclusiveZone: 0
 
-                // Symmetrical Dynamic Island Anchor:
-                // Perfectly centered horizontally on the display
-                property real targetX: Math.round((barWindow.width - island.implicitWidth) / 2)
+                // Cursor tracking: follow pointer along bezel in compact mode, or center/lock when expanded
+                property real pointerX: barWindow.width / 2
+
+                property real targetX: {
+                    if (Config.expanded) {
+                        return Math.round((barWindow.width - island.implicitWidth) / 2);
+                    } else {
+                        let halfW = island.implicitWidth / 2;
+                        return Math.round(Math.max(16, Math.min(pointerX - halfW, barWindow.width - island.implicitWidth - 16)));
+                    }
+                }
 
                 // Click-through mask:
                 // When notch is hidden, only the edge trigger hotspot is masked.
@@ -70,18 +78,18 @@ ShellRoot {
                 Item {
                     id: barWindowArea
                     x: island.x
-                    y: barWindow.isBottomAnchor ? island.y - 40 : island.y
+                    y: barWindow.isBottomAnchor ? island.y - 50 : island.y
                     width: island.width
-                    height: island.height + 40
+                    height: island.height + 50
                 }
 
-                // Bezel Edge Hotspot: catches mouse hovering along the anchor bezel centered with the island
+                // Bezel Edge Hotspot: catches mouse hovering anywhere along the anchor bezel and tracks cursor X
                 Item {
                     id: edgeTrigger
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     y: barWindow.isBottomAnchor ? (parent.height - height) : 0
-                    width: island.implicitWidth
-                    height: 8
+                    height: 10
 
                     HoverHandler {
                         id: edgeHover
@@ -89,6 +97,9 @@ ShellRoot {
                             if (hovered) {
                                 Config.notchHovered = true;
                             }
+                        }
+                        onPointChanged: {
+                            barWindow.pointerX = point.position.x;
                         }
                     }
                 }
