@@ -13,6 +13,7 @@ Item {
     readonly property int iconSize: 13
     
     readonly property int compactHeight: 38
+    readonly property int notificationHeight: 74
     readonly property int expandedHeight: 146
     readonly property int deckWidth: 560
     readonly property int pillRadius: 24
@@ -71,6 +72,12 @@ Item {
     property string powerEventIcon: "󱐋"
     property color powerEventColor: "#34c759"
 
+    // Desktop Notification Transient Event Banner (Apple Dynamic Island Style)
+    property bool isNotificationEventActive: false
+    property var activeNotification: null
+    property var notificationHistory: []
+    property bool notificationModalVisible: false
+
     // App Taskbar Context Menu State
     property var activeAppWindow: null
     property real appMenuX: 0
@@ -79,10 +86,10 @@ Item {
     // Always On Notch State: keeps notch permanently visible in compact glance mode without expanding
     property bool alwaysOn: false
 
-    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, tray menu active, app menu active, power event active, or alwaysOn
+    // Auto-hide hanging notch state: strictly visible when hovered, pinned, manualExpand, power modal open, notification modal open, tray menu active, app menu active, power event active, notification active, or alwaysOn
     property bool notchHovered: false
-    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen || isPowerEventActive || alwaysOn
-    readonly property bool expanded: isPinned || isDeckOpen || powerModalVisible || trayMenuVisible || appMenuVisible
+    readonly property bool notchVisible: notchHovered || isHovered || isPinned || manualExpand || powerModalVisible || notificationModalVisible || trayMenuVisible || appMenuVisible || isDeckOpen || isPowerEventActive || isNotificationEventActive || alwaysOn
+    readonly property bool expanded: isPinned || isDeckOpen || powerModalVisible || notificationModalVisible || trayMenuVisible || appMenuVisible
 
     // Notch Anchor Mode: "auto", "top", or "bottom"
     // "auto": intelligently detects if another monitor is stacked above this monitor.

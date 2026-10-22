@@ -2,10 +2,28 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Services.Notifications
 import "components"
+import "core"
 import "."
 
 ShellRoot {
+    // Dedicated DBus Notification Server listening for desktop notifications
+    Scope {
+        NotificationServer {
+            id: notificationServer
+            actionsSupported: true
+            bodyMarkupSupported: true
+            bodyHyperlinksSupported: true
+            bodyImagesSupported: true
+            imageSupported: true
+
+            onNotification: (notif) => {
+                NotificationService.handleIncomingNotification(notif);
+            }
+        }
+    }
+
     // Dynamic focused monitor tracking: follows active workspace/monitor focus
     readonly property string activeMonitorName: Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : (Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "")
 
@@ -169,6 +187,37 @@ ShellRoot {
                     asynchronous: false
                     sourceComponent: Component {
                         PowerModal {}
+                    }
+                }
+            }
+        }
+    }
+
+    // Centered Notification History Modal Window per screen
+    Variants {
+        model: Config.notificationModalVisible ? Quickshell.screens : []
+        delegate: Component {
+            PanelWindow {
+                id: notifModalWindow
+                required property var modelData
+                screen: modelData
+                visible: Config.notificationModalVisible
+
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
+
+                color: "transparent"
+
+                Loader {
+                    anchors.fill: parent
+                    active: Config.notificationModalVisible
+                    asynchronous: false
+                    sourceComponent: Component {
+                        NotificationHistoryModal {}
                     }
                 }
             }

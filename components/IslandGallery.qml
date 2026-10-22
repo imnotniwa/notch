@@ -147,6 +147,16 @@ Item {
                 }
             }
 
+            // Notification History Modal shortcut (bell icon)
+            IslandButton {
+                icon: "󰂚"
+                active: Config.notificationModalVisible
+                textColor: Config.notificationHistory.length > 0 ? Config.actFg : Config.dimFg
+                onClicked: {
+                    Config.notificationModalVisible = !Config.notificationModalVisible;
+                }
+            }
+
             // Settings Card shortcut (cog icon on the right)
             IslandButton {
                 icon: "󰒓"

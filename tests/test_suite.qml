@@ -582,6 +582,75 @@ Item {
                     Config.alwaysOn = false;
                     assertEquals(Config.notchVisible, false, "Turning off alwaysOn allows notch to auto-hide when idle");
                 }
+            },
+            {
+                name: "Notification Dynamic Island Banner and History Deck Lifecycle",
+                fn: function() {
+                    // Instantiate NotificationService
+                    let notifComp = Qt.createComponent("core/NotificationService.qml");
+                    if (notifComp.status === Component.Error) {
+                        console.error("Notification Service Error: " + notifComp.errorString());
+                    }
+                    assertEquals(notifComp.status, Component.Ready, "NotificationService compiles cleanly");
+                    let notifSvc = notifComp.createObject(testRoot);
+                    assertTrue(notifSvc !== null, "NotificationService created successfully");
+
+                    // Verify default state
+                    assertEquals(Config.isNotificationEventActive, false, "Notification banner is inactive initially");
+                    assertEquals(Config.activeNotification, null, "Active notification is null initially");
+
+                    // Trigger a test notification (Normal)
+                    notifSvc.triggerTestNotification("normal");
+                    assertEquals(Config.isNotificationEventActive, true, "Triggering normal notification activates banner");
+                    assertEquals(Config.notchVisible, true, "Incoming notification forces notch visible");
+                    assertEquals(Config.expanded, false, "Notification banner keeps notch in compact pill (not deck)");
+                    assertTrue(Config.activeNotification !== null, "Active notification object exists");
+                    assertEquals(Config.activeNotification.appName, "Slack", "Notification app name matches");
+                    assertEquals(Config.activeNotification.summary, "Team Sync Started", "Notification summary matches");
+
+                    // Check notification history tracking
+                    assertTrue(Config.notificationHistory.length >= 1, "Notification stored in history");
+                    assertEquals(Config.notificationHistory[0].summary, "Team Sync Started", "History contains latest notification");
+
+                    // Test Dismiss
+                    notifSvc.dismissActive();
+                    assertEquals(Config.isNotificationEventActive, false, "Dismissing active notification closes banner");
+                    assertEquals(Config.activeNotification, null, "Active notification cleared after dismiss");
+
+                    // Trigger Critical Notification
+                    notifSvc.triggerTestNotification("critical");
+                    assertEquals(Config.isNotificationEventActive, true, "Critical alert activates banner");
+                    assertEquals(Config.activeNotification.urgency, 2, "Urgency is 2 (Critical)");
+                    assertEquals(Config.activeNotification.actions.length, 1, "Critical notification has 1 action");
+
+                    // Invoke action
+                    let action = Config.activeNotification.actions[0];
+                    notifSvc.invokeAction(Config.activeNotification, action);
+                    assertEquals(Config.isNotificationEventActive, false, "Invoking action dismisses active banner");
+
+                    // Test Notification History Modal
+                    let modalComp = Qt.createComponent("components/NotificationHistoryModal.qml");
+                    if (modalComp.status === Component.Error) {
+                        console.error("Notification Modal Error: " + modalComp.errorString());
+                    }
+                    assertEquals(modalComp.status, Component.Ready, "NotificationHistoryModal compiles cleanly");
+                    let notifModal = modalComp.createObject(testRoot);
+                    assertTrue(notifModal !== null, "NotificationHistoryModal created successfully");
+
+                    Config.notificationModalVisible = true;
+                    assertEquals(Config.notificationModalVisible, true, "Notification modal visibility state toggles to true");
+                    assertEquals(Config.notchVisible, true, "Notch is visible when notification modal is open");
+
+                    Config.notificationModalVisible = false;
+                    assertEquals(Config.notificationModalVisible, false, "Notification modal closes properly");
+
+                    // Test Clear History
+                    notifSvc.clearHistory();
+                    assertEquals(Config.notificationHistory.length, 0, "Clearing history empties notification records");
+
+                    notifModal.destroy();
+                    notifSvc.destroy();
+                }
             }
         ];
 

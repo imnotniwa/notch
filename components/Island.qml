@@ -15,12 +15,14 @@ Rectangle {
     readonly property bool mediaActiveOrHoverPaused: compactMedia.hasMedia && (compactMedia.isPlaying || (Config.notchVisible && compactMedia.title !== ""))
     readonly property bool hasActiveMedia: mediaActiveOrHoverPaused
     readonly property bool isPowerBanner: Config.isPowerEventActive && !isExpanded
+    readonly property bool isNotificationBanner: Config.isNotificationEventActive && !isExpanded
     readonly property int powerBannerWidth: 260
+    readonly property int notificationBannerWidth: Math.max(notificationPill.implicitWidth + 36, 420)
     readonly property int standardCompactWidth: Math.max(compactRow.implicitWidth + 32, 280)
     readonly property int compactMediaWidth: Math.max(compactMediaPill.implicitWidth + 32, 490)
 
-    implicitWidth: isExpanded ? Config.deckWidth : (isPowerBanner ? powerBannerWidth : (hasActiveMedia ? compactMediaWidth : standardCompactWidth))
-    implicitHeight: isExpanded ? Config.expandedHeight : Config.compactHeight
+    implicitWidth: isExpanded ? Config.deckWidth : (isNotificationBanner ? notificationBannerWidth : (isPowerBanner ? powerBannerWidth : (hasActiveMedia ? compactMediaWidth : standardCompactWidth)))
+    implicitHeight: isExpanded ? Config.expandedHeight : (isNotificationBanner ? Config.notificationHeight : Config.compactHeight)
 
     Behavior on implicitWidth {
         NumberAnimation {
@@ -113,8 +115,8 @@ Rectangle {
         id: compactRow
         anchors.centerIn: parent
         spacing: 12
-        visible: !root.isExpanded && !root.hasActiveMedia && !root.isPowerBanner
-        opacity: (!root.isExpanded && !root.hasActiveMedia && !root.isPowerBanner) ? 1.0 : 0.0
+        visible: !root.isExpanded && !root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner
+        opacity: (!root.isExpanded && !root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner) ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
@@ -145,8 +147,22 @@ Rectangle {
     CompactMediaPill {
         id: compactMediaPill
         anchors.centerIn: parent
-        visible: !root.isExpanded && root.hasActiveMedia && !root.isPowerBanner
-        opacity: (!root.isExpanded && root.hasActiveMedia && !root.isPowerBanner) ? 1.0 : 0.0
+        visible: !root.isExpanded && root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner
+        opacity: (!root.isExpanded && root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner) ? 1.0 : 0.0
+
+        Behavior on opacity {
+            NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+        }
+    }
+
+    // =========================================================================
+    // DYNAMIC ISLAND TRANSIENT NOTIFICATION BANNER (Apple Alerts)
+    // =========================================================================
+    NotificationPill {
+        id: notificationPill
+        anchors.centerIn: parent
+        visible: !root.isExpanded && root.isNotificationBanner
+        opacity: (!root.isExpanded && root.isNotificationBanner) ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -160,8 +176,8 @@ Rectangle {
         id: powerBannerRow
         anchors.centerIn: parent
         spacing: 10
-        visible: !root.isExpanded && root.isPowerBanner
-        opacity: (!root.isExpanded && root.isPowerBanner) ? 1.0 : 0.0
+        visible: !root.isExpanded && root.isPowerBanner && !root.isNotificationBanner
+        opacity: (!root.isExpanded && root.isPowerBanner && !root.isNotificationBanner) ? 1.0 : 0.0
 
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -224,8 +240,8 @@ Rectangle {
     MouseArea {
         anchors.fill: parent
         // In compact mode, capture clicks across the whole bar so child items don't intercept it.
-        // In rich media / expanded deck, put z: -1 so child buttons (media transport, tabs, etc.) receive clicks.
-        z: (!root.isExpanded && !root.hasActiveMedia) ? 10 : -1
+        // In rich media / notification banner / expanded deck, put z: -1 so child buttons (media transport, notification actions, tabs, etc.) receive clicks.
+        z: (!root.isExpanded && !root.hasActiveMedia && !root.isNotificationBanner) ? 10 : -1
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             Config.isDeckOpen = !Config.isDeckOpen;
