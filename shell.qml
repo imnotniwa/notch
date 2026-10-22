@@ -1,6 +1,7 @@
 //@ pragma UseQApplication
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.Notifications
 import "components"
@@ -171,6 +172,8 @@ ShellRoot {
                 required property var modelData
                 screen: modelData
                 visible: Config.powerModalVisible
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
                 anchors {
                     top: true
@@ -202,6 +205,8 @@ ShellRoot {
                 required property var modelData
                 screen: modelData
                 visible: Config.notificationModalVisible
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
                 anchors {
                     top: true

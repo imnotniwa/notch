@@ -10,10 +10,16 @@ Item {
     id: root
 
     anchors.fill: parent
+    focus: true
 
     readonly property var history: Config.notificationHistory || []
 
+    Keys.onEscapePressed: {
+        Config.notificationModalVisible = false;
+    }
+
     Component.onCompleted: {
+        root.forceActiveFocus();
         modalCard.scale = 0.92;
         modalCard.opacity = 0;
         openAnim.start();
@@ -21,6 +27,7 @@ Item {
 
     onVisibleChanged: {
         if (visible) {
+            root.forceActiveFocus();
             modalCard.scale = 0.92;
             modalCard.opacity = 0;
             openAnim.start();

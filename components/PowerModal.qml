@@ -10,8 +10,18 @@ Item {
     property string viewState: "menu"
 
     anchors.fill: parent
+    focus: true
+
+    Keys.onEscapePressed: {
+        if (root.viewState !== "menu") {
+            root.viewState = "menu";
+        } else {
+            Config.powerModalVisible = false;
+        }
+    }
 
     Component.onCompleted: {
+        root.forceActiveFocus();
         root.viewState = "menu";
         modalCard.scale = 0.92;
         modalCard.opacity = 0;
@@ -21,6 +31,7 @@ Item {
     // Reset view state whenever modal is opened
     onVisibleChanged: {
         if (visible) {
+            root.forceActiveFocus();
             root.viewState = "menu";
             modalCard.scale = 0.92;
             modalCard.opacity = 0;
