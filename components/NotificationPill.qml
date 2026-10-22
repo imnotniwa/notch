@@ -49,21 +49,21 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.isCritical ? "󰀦" : (root.notif && root.notif.summary ? root.notif.summary.charAt(0).toUpperCase() : "󰂚")
-                    font.family: (root.isCritical || !(root.notif && root.notif.summary)) ? Config.iconFont : Config.bodyFont
-                    font.pixelSize: (root.isCritical || !(root.notif && root.notif.summary)) ? 18 : 16
+                    text: root.isCritical ? "󰀦" : (root.notif && root.notif.summary ? root.notif.summary.charAt(0).toUpperCase() : (root.notif && root.notif.appName ? root.notif.appName.charAt(0).toUpperCase() : "󰂚"))
+                    font.family: (root.isCritical || !(root.notif && (root.notif.summary || root.notif.appName))) ? Config.iconFont : Config.bodyFont
+                    font.pixelSize: (root.isCritical || !(root.notif && (root.notif.summary || root.notif.appName))) ? 18 : 16
                     font.weight: Font.Bold
                     color: root.isCritical ? Config.danger : Config.mainFg
                     visible: !(root.notif && root.notif.appIcon) || !parent.children[0].visible
                 }
             }
 
-            // Small bottom-right app badge (e.g., WhatsApp, Slack, Message emblem)
+            // Small bottom-right app badge (e.g., WhatsApp, Teams, Discord, System)
             Rectangle {
                 width: 18
                 height: 18
                 radius: 9
-                color: root.isCritical ? Config.danger : (root.notif && root.notif.appName && root.notif.appName.toLowerCase().includes("whatsapp") ? "#25D366" : Qt.rgba(0.1, 0.6, 0.2, 0.95))
+                color: root.isCritical ? Config.danger : (root.notif && root.notif.badgeColor ? root.notif.badgeColor : Config.actBg)
                 border.color: "#000000"
                 border.width: 1.5
                 anchors.right: parent.right
@@ -79,10 +79,9 @@ Item {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.isCritical ? "!" : "󰂚"
-                    font.family: root.isCritical ? Config.bodyFont : Config.iconFont
-                    font.pixelSize: root.isCritical ? 10 : 8
-                    font.weight: Font.Bold
+                    text: root.notif && root.notif.badgeIcon ? root.notif.badgeIcon : "󰂚"
+                    font.family: Config.iconFont
+                    font.pixelSize: 9
                     color: "#ffffff"
                     visible: !(root.notif && root.notif.appIcon) || !parent.children[0].visible
                 }
@@ -97,11 +96,11 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: Math.min(Math.max(bodyLine1.implicitWidth, titleRow.implicitWidth), 310)
 
-            // Top Row: Sender / Summary Title and "now" timestamp
+            // Top Row: Sender / Summary Title, App Name tag, and "now" timestamp
             RowLayout {
                 id: titleRow
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: 6
 
                 Text {
                     text: root.notif ? root.notif.summary : ""
@@ -111,6 +110,26 @@ Item {
                     color: root.isCritical ? Config.danger : Config.mainFg
                     elide: Text.ElideRight
                     Layout.fillWidth: true
+                }
+
+                // Clean App Name Badge if different from Sender
+                Rectangle {
+                    implicitHeight: 16
+                    implicitWidth: appTagText.implicitWidth + 8
+                    radius: 8
+                    color: Qt.rgba(1, 1, 1, 0.08)
+                    visible: root.notif && root.notif.appName && root.notif.appName !== root.notif.summary
+                    Layout.alignment: Qt.AlignVCenter
+
+                    Text {
+                        id: appTagText
+                        anchors.centerIn: parent
+                        text: root.notif ? root.notif.appName : ""
+                        font.family: Config.bodyFont
+                        font.pixelSize: 9
+                        color: Config.dimFg
+                        font.weight: Font.Medium
+                    }
                 }
 
                 Text {

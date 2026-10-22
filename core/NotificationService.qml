@@ -20,6 +20,97 @@ Item {
         }
     }
 
+    // Categorize notification into human-friendly app / system information
+    function categorizeNotification(notif) {
+        let appName = (notif.appName || "").trim();
+        let desktopEntry = (notif.desktopEntry || "").toLowerCase().trim();
+        let appIcon = (notif.appIcon || "").trim();
+        let summary = (notif.summary || "").trim();
+        let body = (notif.body || "").trim();
+
+        let cleanAppName = appName;
+        let cleanIcon = appIcon;
+        let category = "app"; // "chat", "media", "system", "app"
+        let badgeColor = "#0071e3";
+        let badgeIcon = "󰂚";
+
+        let lowerApp = appName.toLowerCase();
+        let lowerIcon = appIcon.toLowerCase();
+
+        // 1. Teams for Linux / Microsoft Teams
+        if (lowerApp.includes("teams") || desktopEntry.includes("teams") || lowerIcon.includes("teams")) {
+            cleanAppName = "Microsoft Teams";
+            cleanIcon = cleanIcon || "teams-for-linux";
+            category = "chat";
+            badgeColor = "#5059C9"; // Teams purple/blue
+            badgeIcon = "󰊻";
+        }
+        // 2. WhatsApp
+        else if (lowerApp.includes("whatsapp") || desktopEntry.includes("whatsapp") || lowerIcon.includes("whatsapp")) {
+            cleanAppName = "WhatsApp";
+            cleanIcon = cleanIcon || "whatsapp";
+            category = "chat";
+            badgeColor = "#25D366"; // WhatsApp green
+            badgeIcon = "󰖣";
+        }
+        // 3. Discord
+        else if (lowerApp.includes("discord") || desktopEntry.includes("discord") || lowerIcon.includes("discord")) {
+            cleanAppName = "Discord";
+            cleanIcon = cleanIcon || "discord";
+            category = "chat";
+            badgeColor = "#5865F2";
+            badgeIcon = "󰙯";
+        }
+        // 4. Slack
+        else if (lowerApp.includes("slack") || desktopEntry.includes("slack") || lowerIcon.includes("slack")) {
+            cleanAppName = "Slack";
+            cleanIcon = cleanIcon || "slack";
+            category = "chat";
+            badgeColor = "#4A154B";
+            badgeIcon = "󰒱";
+        }
+        // 5. Telegram
+        else if (lowerApp.includes("telegram") || desktopEntry.includes("telegram") || lowerIcon.includes("telegram")) {
+            cleanAppName = "Telegram";
+            cleanIcon = cleanIcon || "telegram";
+            category = "chat";
+            badgeColor = "#2AABEE";
+            badgeIcon = "󰀲";
+        }
+        // 6. Spotify / Music
+        else if (lowerApp.includes("spotify") || lowerIcon.includes("spotify")) {
+            cleanAppName = "Spotify";
+            cleanIcon = cleanIcon || "spotify";
+            category = "media";
+            badgeColor = "#1DB954";
+            badgeIcon = "";
+        }
+        // 7. System / Hardware / Power notifications
+        else if (lowerApp.includes("power") || lowerApp.includes("battery") || lowerApp.includes("system") ||
+                 lowerIcon.includes("battery") || lowerIcon.includes("dialog") || lowerApp === "" || lowerApp === "notify-send") {
+            cleanAppName = "System";
+            cleanIcon = cleanIcon || "dialog-information";
+            category = "system";
+            badgeColor = notif.urgency === 2 ? "#ff3b30" : "#86868b";
+            badgeIcon = notif.urgency === 2 ? "󰀦" : "󰌢";
+        }
+
+        // If the summary is formatted as "AppName: Author" or contains colon, sanitize if appName is duplicated
+        let cleanSender = summary;
+        if (!cleanSender && cleanAppName) {
+            cleanSender = cleanAppName;
+        }
+
+        return {
+            appName: cleanAppName || "Notification",
+            appIcon: cleanIcon,
+            category: category,
+            badgeColor: badgeColor,
+            badgeIcon: badgeIcon,
+            sender: cleanSender
+        };
+    }
+
     function handleIncomingNotification(notif) {
         if (!notif) return;
 
@@ -28,11 +119,17 @@ Item {
             notif.tracked = true;
         } catch (e) {}
 
+        let meta = categorizeNotification(notif);
+
         let record = {
             id: notif.id !== undefined ? notif.id : Date.now(),
-            appName: notif.appName || "Notification",
-            appIcon: notif.appIcon || "",
-            summary: notif.summary || "",
+            appName: meta.appName,
+            appIcon: meta.appIcon,
+            category: meta.category,
+            badgeColor: meta.badgeColor,
+            badgeIcon: meta.badgeIcon,
+            sender: meta.sender,
+            summary: notif.summary || meta.appName,
             body: notif.body || "",
             urgency: notif.urgency !== undefined ? notif.urgency : 1, // 0: low, 1: normal, 2: critical
             actions: notif.actions || [],
@@ -161,10 +258,10 @@ Item {
             // Normal
             notifRecord = {
                 id: Date.now(),
-                appName: "Slack",
-                appIcon: "slack",
-                summary: "Team Sync Started",
-                body: "Frontend Architecture discussion is live in #engineering.",
+                appName: "teams-for-linux",
+                appIcon: "teams-for-linux",
+                summary: "Liam Patterson",
+                body: "Hey, are we still on for coffee later? I might be 10–15 minutes late, traffic looks...",
                 urgency: 1,
                 actions: [],
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -172,19 +269,6 @@ Item {
             };
         }
 
-        // Add to history
-        let hist = root.historyList.slice();
-        hist.unshift(notifRecord);
-        root.historyList = hist;
-        Config.notificationHistory = hist;
-
-        // Push to alert banner
-        let q = root.alertQueue.slice();
-        q.push(notifRecord);
-        root.alertQueue = q;
-
-        if (!Config.isNotificationEventActive) {
-            processNextAlert();
-        }
+        handleIncomingNotification(notifRecord);
     }
 }

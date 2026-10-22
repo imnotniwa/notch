@@ -291,7 +291,7 @@ Item {
                                     implicitWidth: 20
                                     implicitHeight: 20
                                     radius: 10
-                                    color: itemRow.modelData.urgency === 2 ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.25) : Qt.rgba(1, 1, 1, 0.12)
+                                    color: itemRow.modelData.urgency === 2 ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.25) : (itemRow.modelData.badgeColor ? itemRow.modelData.badgeColor : Qt.rgba(1, 1, 1, 0.12))
 
                                     IconImage {
                                         anchors.centerIn: parent
@@ -303,10 +303,10 @@ Item {
 
                                     Text {
                                         anchors.centerIn: parent
-                                        text: itemRow.modelData.urgency === 2 ? "󰀦" : "󰂚"
+                                        text: itemRow.modelData.urgency === 2 ? "󰀦" : (itemRow.modelData.badgeIcon ? itemRow.modelData.badgeIcon : "󰂚")
                                         font.family: Config.iconFont
                                         font.pixelSize: 10
-                                        color: itemRow.modelData.urgency === 2 ? Config.danger : Config.actFg
+                                        color: itemRow.modelData.urgency === 2 ? Config.danger : "#ffffff"
                                         visible: !itemRow.modelData.appIcon || !parent.children[0].visible
                                     }
                                 }
@@ -315,8 +315,26 @@ Item {
                                     text: itemRow.modelData.appName || "Notification"
                                     font.family: Config.bodyFont
                                     font.pixelSize: 11
-                                    font.weight: Font.Medium
+                                    font.weight: Font.DemiBold
                                     color: Config.mainFg
+                                }
+
+                                Rectangle {
+                                    implicitHeight: 16
+                                    implicitWidth: catTag.implicitWidth + 8
+                                    radius: 8
+                                    color: Qt.rgba(1, 1, 1, 0.08)
+                                    visible: itemRow.modelData.category && itemRow.modelData.category !== ""
+
+                                    Text {
+                                        id: catTag
+                                        anchors.centerIn: parent
+                                        text: itemRow.modelData.category ? itemRow.modelData.category.toUpperCase() : ""
+                                        font.family: Config.bodyFont
+                                        font.pixelSize: 8
+                                        font.weight: Font.Bold
+                                        color: Config.dimFg
+                                    }
                                 }
 
                                 Item { Layout.fillWidth: true }

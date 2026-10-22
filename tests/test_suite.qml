@@ -605,12 +605,12 @@ Item {
                     assertEquals(Config.notchVisible, true, "Incoming notification forces notch visible");
                     assertEquals(Config.expanded, false, "Notification banner keeps notch in compact pill (not deck)");
                     assertTrue(Config.activeNotification !== null, "Active notification object exists");
-                    assertEquals(Config.activeNotification.appName, "Slack", "Notification app name matches");
-                    assertEquals(Config.activeNotification.summary, "Team Sync Started", "Notification summary matches");
+                    assertEquals(Config.activeNotification.appName, "Microsoft Teams", "Notification app name matches clean categorized name");
+                    assertEquals(Config.activeNotification.summary, "Liam Patterson", "Notification sender matches");
 
                     // Check notification history tracking
                     assertTrue(Config.notificationHistory.length >= 1, "Notification stored in history");
-                    assertEquals(Config.notificationHistory[0].summary, "Team Sync Started", "History contains latest notification");
+                    assertEquals(Config.notificationHistory[0].summary, "Liam Patterson", "History contains latest notification");
 
                     // Test Dismiss
                     notifSvc.dismissActive();
