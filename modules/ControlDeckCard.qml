@@ -625,199 +625,88 @@ Item {
         }
 
         // =====================================================================
-        // Card 4: Bluetooth & Quick Actions (Bottom-Right)
+        // Card 4: Bluetooth (Bottom-Right) - Dedicated Full Card matching Wi-Fi
         // =====================================================================
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 44
             radius: 10
-            color: Config.subPillBg
+            color: btMouse.containsMouse ? Config.hvrBg : Config.subPillBg
             border.color: Config.subPillBorder
             border.width: 1
             clip: true
 
-            ColumnLayout {
+            RowLayout {
                 anchors.fill: parent
-                anchors.topMargin: 5
-                anchors.bottomMargin: 5
-                anchors.leftMargin: 8
-                anchors.rightMargin: 8
-                spacing: 3
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                spacing: 8
 
-                // Top: Bluetooth status pill
-                Rectangle {
+                Text {
+                    text: root.btPowered ? "󰂯" : "󰂲"
+                    font.family: Config.iconFont
+                    font.pixelSize: 14
+                    color: root.btPowered ? Config.actFg : Qt.rgba(1, 1, 1, 0.4)
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                ColumnLayout {
                     Layout.fillWidth: true
-                    implicitHeight: 16
-                    radius: 4
-                    color: btPillM.containsMouse ? Config.hvrBg : Qt.rgba(1, 1, 1, 0.06)
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: 1
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 6
-                        anchors.rightMargin: 6
-                        spacing: 4
-
-                        Text {
-                            text: root.btPowered ? "󰂯" : "󰂲"
-                            font.family: Config.iconFont
-                            font.pixelSize: 10
-                            color: root.btPowered ? Config.actFg : Qt.rgba(1, 1, 1, 0.4)
-                        }
-
-                        Text {
-                            text: "Bluetooth"
-                            font.family: Config.bodyFont
-                            font.pixelSize: 9
-                            font.weight: Font.DemiBold
-                            color: Config.mainFg
-                        }
-
-                        Item { Layout.fillWidth: true }
-
-                        Text {
-                            text: root.btPowered ? (root.btDeviceName !== "" ? root.btDeviceName : "On") : "Off"
-                            font.family: Config.bodyFont
-                            font.pixelSize: 8
-                            color: Qt.rgba(1, 1, 1, 0.5)
-                            elide: Text.ElideRight
-                            Layout.maximumWidth: 100
-                        }
+                    Text {
+                        text: "Bluetooth"
+                        font.family: Config.bodyFont
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
+                        color: Config.mainFg
                     }
 
-                    MouseArea {
-                        id: btPillM
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            HyprlandLua.toggleBluetooth();
-                            btTimer.start();
-                        }
-                        onDoubleClicked: {
-                            HyprlandLua.openBluetoothManager();
-                        }
-                    }
-
-                    Timer {
-                        id: btTimer
-                        interval: 400
-                        onTriggered: {
-                            btStatusProc.running = true;
-                            btDeviceProc.running = true;
-                        }
+                    Text {
+                        text: root.btPowered ? (root.btDeviceName !== "" ? root.btDeviceName : "Enabled") : "Disabled"
+                        font.family: Config.bodyFont
+                        font.pixelSize: 9
+                        color: Qt.rgba(1, 1, 1, 0.5)
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
                     }
                 }
 
-                // Bottom: 4 Quick Action Tool Pills
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 4
+                Text {
+                    text: "󰒓"
+                    font.family: Config.iconFont
+                    font.pixelSize: 10
+                    color: Qt.rgba(1, 1, 1, 0.25)
+                    Layout.alignment: Qt.AlignVCenter
+                }
+            }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 16
-                        radius: 4
-                        color: root.sunsetActive ? Qt.rgba(0.9, 0.6, 0.2, 0.25) : (sunsetM.containsMouse ? Config.hvrBg : Qt.rgba(1, 1, 1, 0.06))
-                        border.color: root.sunsetActive ? Qt.rgba(0.9, 0.6, 0.2, 0.4) : "transparent"
-                        border.width: 1
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰖔"
-                            font.family: Config.iconFont
-                            font.pixelSize: 10
-                            color: root.sunsetActive ? "#f39c12" : Config.mainFg
-                        }
-
-                        MouseArea {
-                            id: sunsetM
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                HyprlandLua.toggleSunset();
-                                root.sunsetActive = !root.sunsetActive;
-                            }
-                        }
+            MouseArea {
+                id: btMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onClicked: (mouse) => {
+                    if (mouse.button === Qt.RightButton) {
+                        HyprlandLua.openBluetoothManager();
+                    } else {
+                        HyprlandLua.toggleBluetooth();
+                        btTimer.start();
                     }
+                }
+                onDoubleClicked: {
+                    HyprlandLua.openBluetoothManager();
+                }
+            }
 
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 16
-                        radius: 4
-                        color: pickM.containsMouse ? Config.hvrBg : Qt.rgba(1, 1, 1, 0.06)
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰈊"
-                            font.family: Config.iconFont
-                            font.pixelSize: 10
-                            color: Config.mainFg
-                        }
-
-                        MouseArea {
-                            id: pickM
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: HyprlandLua.pickColor()
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 16
-                        radius: 4
-                        color: snipM.containsMouse ? Config.hvrBg : Qt.rgba(1, 1, 1, 0.06)
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "󰹑"
-                            font.family: Config.iconFont
-                            font.pixelSize: 10
-                            color: Config.mainFg
-                        }
-
-                        MouseArea {
-                            id: snipM
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: HyprlandLua.screenshot()
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        implicitHeight: 16
-                        radius: 4
-                        color: pwrM.containsMouse ? Qt.rgba(Config.danger.r, Config.danger.g, Config.danger.b, 0.22) : Qt.rgba(1, 1, 1, 0.06)
-                        border.color: pwrM.containsMouse ? Config.danger : "transparent"
-                        border.width: 1
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: ""
-                            font.family: Config.iconFont
-                            font.pixelSize: 10
-                            color: Config.danger
-                        }
-
-                        MouseArea {
-                            id: pwrM
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onClicked: (mouse) => {
-                                if (mouse.button === Qt.RightButton) {
-                                    Config.run("wlogout || hyde-shell logoutlaunch 1");
-                                } else {
-                                    Config.powerModalVisible = true;
-                                }
-                            }
-                        }
-                    }
+            Timer {
+                id: btTimer
+                interval: 400
+                onTriggered: {
+                    btStatusProc.running = true;
+                    btDeviceProc.running = true;
                 }
             }
         }
