@@ -14,7 +14,7 @@ Item {
         { name: "Spaces", icon: "" },
         { name: "Hardware", icon: "󰘚" },
         { name: "Control", icon: "󰕰" },
-        { name: "Tray", icon: "󰀻" }
+        { name: "Tray", icon: "󰔵" }
     ]
 
     ColumnLayout {
