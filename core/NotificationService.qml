@@ -7,8 +7,11 @@ Item {
 
     // Pending popup queue for incoming alerts
     property var alertQueue: []
-    // History list of notification records
+    // History list of notification records (pure serializable primitives)
     property var historyList: []
+
+    // Map of raw Notification objects indexed by ID for actions/dismiss
+    property var liveNotifMap: ({})
 
     // Timer controlling how long the dynamic island stays popped open for an alert
     Timer {
@@ -95,7 +98,6 @@ Item {
             badgeIcon = notif.urgency === 2 ? "󰀦" : "󰌢";
         }
 
-        // If the summary is formatted as "AppName: Author" or contains colon, sanitize if appName is duplicated
         let cleanSender = summary;
         if (!cleanSender && cleanAppName) {
             cleanSender = cleanAppName;
@@ -114,33 +116,51 @@ Item {
     function handleIncomingNotification(notif) {
         if (!notif) return;
 
-        // Keep notif tracked so actions and dismissal can be handled cleanly
         try {
             notif.tracked = true;
         } catch (e) {}
 
         let meta = categorizeNotification(notif);
 
+        // Convert actions to plain JSON objects (no QObject references)
+        let plainActions = [];
+        if (notif.actions) {
+            for (let i = 0; i < notif.actions.length; i++) {
+                let act = notif.actions[i];
+                if (act) {
+                    plainActions.push({
+                        identifier: String(act.identifier || ""),
+                        text: String(act.text || act.identifier || "")
+                    });
+                }
+            }
+        }
+
+        let notifId = String(notif.id !== undefined ? notif.id : Date.now());
+
+        // Keep raw C++ reference separately in liveNotifMap
+        root.liveNotifMap[notifId] = notif;
+
+        // Pure JS primitive record: SAFE for QVariantList / QML ListView models
         let record = {
-            id: notif.id !== undefined ? notif.id : Date.now(),
-            appName: meta.appName,
-            appIcon: meta.appIcon,
-            category: meta.category,
-            badgeColor: meta.badgeColor,
-            badgeIcon: meta.badgeIcon,
-            sender: meta.sender,
-            summary: notif.summary || meta.appName,
-            body: notif.body || "",
-            urgency: notif.urgency !== undefined ? notif.urgency : 1, // 0: low, 1: normal, 2: critical
-            actions: notif.actions || [],
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            rawNotif: notif
+            id: notifId,
+            appName: String(meta.appName),
+            appIcon: String(meta.appIcon),
+            category: String(meta.category),
+            badgeColor: String(meta.badgeColor),
+            badgeIcon: String(meta.badgeIcon),
+            sender: String(meta.sender),
+            summary: String(notif.summary || meta.appName),
+            body: String(notif.body || ""),
+            urgency: Number(notif.urgency !== undefined ? notif.urgency : 1),
+            actions: plainActions,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
 
         // Add to history (newest first)
         let hist = root.historyList.slice();
         hist.unshift(record);
-        if (hist.length > 50) hist.pop(); // Cap history to 50
+        if (hist.length > 50) hist.pop();
         root.historyList = hist;
         Config.notificationHistory = hist;
 
@@ -181,10 +201,13 @@ Item {
 
     function dismissActive() {
         bannerTimer.stop();
-        if (Config.activeNotification && Config.activeNotification.rawNotif) {
-            try {
-                Config.activeNotification.rawNotif.dismiss();
-            } catch (e) {}
+        if (Config.activeNotification && Config.activeNotification.id) {
+            let notifObj = root.liveNotifMap[Config.activeNotification.id];
+            if (notifObj) {
+                try {
+                    notifObj.dismiss();
+                } catch (e) {}
+            }
         }
         Config.isNotificationEventActive = false;
         Config.activeNotification = null;
@@ -196,10 +219,19 @@ Item {
     }
 
     function invokeAction(record, action) {
-        if (action && typeof action.invoke === "function") {
-            try {
-                action.invoke();
-            } catch (e) {}
+        if (record && record.id) {
+            let notifObj = root.liveNotifMap[record.id];
+            if (notifObj && notifObj.actions) {
+                for (let i = 0; i < notifObj.actions.length; i++) {
+                    let a = notifObj.actions[i];
+                    if (a && a.identifier === action.identifier) {
+                        try {
+                            a.invoke();
+                        } catch (e) {}
+                        break;
+                    }
+                }
+            }
         }
         dismissActive();
     }
@@ -207,6 +239,7 @@ Item {
     function clearHistory() {
         root.historyList = [];
         Config.notificationHistory = [];
+        root.liveNotifMap = ({});
     }
 
     // Trigger local interactive test notifications for immediate visual verification
@@ -224,12 +257,10 @@ Item {
                 actions: [
                     {
                         identifier: "powersave",
-                        text: "Turn On Power Saver",
-                        invoke: function() { console.log("Power Saver Invoked"); }
+                        text: "Turn On Power Saver"
                     }
                 ],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                rawNotif: null
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
         } else if (type === "actions") {
             notifRecord = {
@@ -242,17 +273,14 @@ Item {
                 actions: [
                     {
                         identifier: "review",
-                        text: "Review Changes",
-                        invoke: function() { console.log("Review Changes Invoked"); }
+                        text: "Review Changes"
                     },
                     {
                         identifier: "dismiss",
-                        text: "Dismiss",
-                        invoke: function() { root.dismissActive(); }
+                        text: "Dismiss"
                     }
                 ],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                rawNotif: null
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
         } else {
             // Normal
@@ -264,8 +292,7 @@ Item {
                 body: "Hey, are we still on for coffee later? I might be 10–15 minutes late, traffic looks...",
                 urgency: 1,
                 actions: [],
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                rawNotif: null
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             };
         }
 
