@@ -33,6 +33,16 @@ Item {
         return "";
     }
 
+    function setVolumeFrac(val) {
+        let clamped = Math.max(0.0, Math.min(1.0, val));
+        if (root.sink && root.sink.audio) {
+            root.sink.audio.volume = clamped;
+            if (root.isMuted) {
+                root.sink.audio.muted = false;
+            }
+        }
+    }
+
     // =========================================================================
     // Brightness Telemetry & Controls
     // =========================================================================
@@ -54,6 +64,12 @@ Item {
         if (!isNaN(cur) && !isNaN(max) && max > 0) {
             root.brightnessPct = Math.round((cur / max) * 100);
         }
+    }
+
+    function setBrightness(pct) {
+        let clamped = Math.max(5, Math.min(100, Math.round(pct)));
+        root.brightnessPct = clamped;
+        Config.run("brightnessctl set " + clamped + "%");
     }
 
     // =========================================================================
@@ -240,7 +256,7 @@ Item {
                         }
                     }
 
-                    // Brightness Pill Slider Track
+                    // Brightness Pill Slider Track (supports click, drag, and scroll wheel)
                     Rectangle {
                         id: brightTrack
                         Layout.fillWidth: true
@@ -265,10 +281,25 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: (mouse) => {
-                                let pct = Math.max(5, Math.min(100, Math.round((mouse.x / width) * 100)));
-                                root.brightnessPct = pct;
-                                Config.run("brightnessctl set " + pct + "%");
+                            hoverEnabled: true
+
+                            function updateFromPos(mouseX) {
+                                let pct = (mouseX / width) * 100;
+                                root.setBrightness(pct);
+                            }
+
+                            onPressed: (mouse) => updateFromPos(mouse.x)
+                            onPositionChanged: (mouse) => {
+                                if (pressed) {
+                                    updateFromPos(mouse.x);
+                                }
+                            }
+                            onWheel: (wheel) => {
+                                if (wheel.angleDelta.y > 0) {
+                                    root.setBrightness(root.brightnessPct + 5);
+                                } else if (wheel.angleDelta.y < 0) {
+                                    root.setBrightness(root.brightnessPct - 5);
+                                }
                             }
                         }
                     }
@@ -345,7 +376,7 @@ Item {
                         }
                     }
 
-                    // Volume Pill Slider Track
+                    // Volume Pill Slider Track (supports click, drag, and scroll wheel)
                     Rectangle {
                         id: volTrack
                         Layout.fillWidth: true
@@ -366,13 +397,25 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: (mouse) => {
-                                let frac = Math.max(0.0, Math.min(1.0, mouse.x / width));
-                                if (root.sink && root.sink.audio) {
-                                    root.sink.audio.volume = frac;
-                                    if (root.isMuted) {
-                                        root.sink.audio.muted = false;
-                                    }
+                            hoverEnabled: true
+
+                            function updateFromPos(mouseX) {
+                                let frac = mouseX / width;
+                                root.setVolumeFrac(frac);
+                            }
+
+                            onPressed: (mouse) => updateFromPos(mouse.x)
+                            onPositionChanged: (mouse) => {
+                                if (pressed) {
+                                    updateFromPos(mouse.x);
+                                }
+                            }
+                            onWheel: (wheel) => {
+                                let step = 0.05;
+                                if (wheel.angleDelta.y > 0) {
+                                    root.setVolumeFrac(root.volumeFrac + step);
+                                } else if (wheel.angleDelta.y < 0) {
+                                    root.setVolumeFrac(root.volumeFrac - step);
                                 }
                             }
                         }
@@ -413,7 +456,7 @@ Item {
                 columnSpacing: 10
                 rowSpacing: 10
 
-                // 1. Wi-Fi Toggle
+                // 1. Wi-Fi Toggle & Manager
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -429,11 +472,25 @@ Item {
                         anchors.margins: 10
                         spacing: 2
 
-                        Text {
-                            text: root.wifiConnected ? "󰖩" : "󰖪"
-                            color: root.wifiConnected ? Config.actBg : Config.dimFg
-                            font.family: Config.iconFont
-                            font.pixelSize: 18
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 4
+
+                            Text {
+                                text: root.wifiConnected ? "󰖩" : "󰖪"
+                                color: root.wifiConnected ? Config.actBg : Config.dimFg
+                                font.family: Config.iconFont
+                                font.pixelSize: 18
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            Text {
+                                text: "󰒓"
+                                color: Qt.rgba(1, 1, 1, 0.3)
+                                font.family: Config.iconFont
+                                font.pixelSize: 11
+                            }
                         }
 
                         Item { Layout.fillHeight: true }
@@ -461,13 +518,32 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            Config.run("nm-connection-editor || foot -e nmtui");
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        onClicked: (mouse) => {
+                            if (mouse.button === Qt.RightButton) {
+                                // Right-click: launch GUI connection manager
+                                Config.run("nm-connection-editor || kitty -e nmtui");
+                            } else {
+                                // Left-click: toggle radio power on/off
+                                Config.run("rfkill toggle wifi || nmcli radio wifi " + (root.wifiConnected ? "off" : "on"));
+                                root.wifiConnected = !root.wifiConnected;
+                                if (!root.wifiConnected) root.wifiSsid = "Disconnected";
+                                wifiRefreshTimer.start();
+                            }
                         }
+                        onDoubleClicked: {
+                            Config.run("nm-connection-editor || kitty -e nmtui");
+                        }
+                    }
+
+                    Timer {
+                        id: wifiRefreshTimer
+                        interval: 800
+                        onTriggered: ssidProc.running = true
                     }
                 }
 
-                // 2. Bluetooth Toggle
+                // 2. Bluetooth Toggle & Manager
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -483,11 +559,25 @@ Item {
                         anchors.margins: 10
                         spacing: 2
 
-                        Text {
-                            text: root.btPowered ? "󰂯" : "󰂲"
-                            color: root.btPowered ? "#0071e3" : Config.dimFg
-                            font.family: Config.iconFont
-                            font.pixelSize: 18
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 4
+
+                            Text {
+                                text: root.btPowered ? "󰂯" : "󰂲"
+                                color: root.btPowered ? "#0071e3" : Config.dimFg
+                                font.family: Config.iconFont
+                                font.pixelSize: 18
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            Text {
+                                text: "󰒓"
+                                color: Qt.rgba(1, 1, 1, 0.3)
+                                font.family: Config.iconFont
+                                font.pixelSize: 11
+                            }
                         }
 
                         Item { Layout.fillHeight: true }
@@ -515,15 +605,32 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (root.btPowered) {
-                                Config.run("bluetoothctl power off");
-                                root.btPowered = false;
+                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                        onClicked: (mouse) => {
+                            if (mouse.button === Qt.RightButton) {
+                                HyprlandLua.openBluetoothManager();
                             } else {
-                                Config.run("bluetoothctl power on");
-                                root.btPowered = true;
+                                if (root.btPowered) {
+                                    Config.run("bluetoothctl power off");
+                                    root.btPowered = false;
+                                } else {
+                                    Config.run("bluetoothctl power on");
+                                    root.btPowered = true;
+                                }
+                                btRefreshTimer.start();
                             }
+                        }
+                        onDoubleClicked: {
+                            HyprlandLua.openBluetoothManager();
+                        }
+                    }
+
+                    Timer {
+                        id: btRefreshTimer
+                        interval: 500
+                        onTriggered: {
                             btStatusProc.running = true;
+                            btDeviceProc.running = true;
                         }
                     }
                 }
@@ -577,7 +684,14 @@ Item {
                         onClicked: {
                             Config.run("hyde-shell caffeine -t -P waybar,21");
                             root.caffeineActive = !root.caffeineActive;
+                            cafRefreshTimer.start();
                         }
+                    }
+
+                    Timer {
+                        id: cafRefreshTimer
+                        interval: 600
+                        onTriggered: caffeineStatusProc.running = true
                     }
                 }
 
@@ -635,8 +749,14 @@ Item {
                                 Config.run("hyprsunset -t 4500 &");
                                 root.nightLightActive = true;
                             }
-                            nightLightCheckProc.running = true;
+                            nlRefreshTimer.start();
                         }
+                    }
+
+                    Timer {
+                        id: nlRefreshTimer
+                        interval: 600
+                        onTriggered: nightLightCheckProc.running = true
                     }
                 }
             }

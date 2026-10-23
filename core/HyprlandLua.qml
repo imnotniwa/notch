@@ -58,7 +58,7 @@ Item {
     }
 
     function openBluetoothManager() {
-        Config.run("blueman-manager || blueberry || hyprctl dispatch exec [float] blueman-manager");
+        Config.run("blueman-manager || blueberry || hyprctl dispatch 'hl.dsp.exec_cmd(\"blueman-manager\")'");
     }
 
     function lock() {
