@@ -228,4 +228,37 @@ ShellRoot {
             }
         }
     }
+
+    // Centered Add Task (Todo) Modal Window per screen
+    Variants {
+        model: Config.todoModalVisible ? Quickshell.screens : []
+        delegate: Component {
+            PanelWindow {
+                id: todoModalWindow
+                required property var modelData
+                screen: modelData
+                visible: Config.todoModalVisible
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
+
+                color: "transparent"
+
+                Loader {
+                    anchors.fill: parent
+                    active: Config.todoModalVisible
+                    asynchronous: false
+                    sourceComponent: Component {
+                        TodoAddModal {}
+                    }
+                }
+            }
+        }
+    }
 }

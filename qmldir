@@ -1,3 +1,4 @@
 singleton Config 1.0 Config.qml
 singleton HyprlandLua 1.0 core/HyprlandLua.qml
 singleton NotificationService 1.0 core/NotificationService.qml
+singleton TodoService 1.0 core/TodoService.qml
