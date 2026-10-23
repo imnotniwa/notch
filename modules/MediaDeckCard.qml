@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
 import Quickshell.Services.Mpris
 import "../components"
@@ -8,176 +9,354 @@ import ".."
 Item {
     id: root
 
-    implicitWidth: 520
-    implicitHeight: 96
+    implicitWidth: 600
+    implicitHeight: 228
+
+    // Track user-selected player index, defaulting to the first playing player
+    property int selectedPlayerIdx: 0
+
+    readonly property var playerList: {
+        if (!Mpris.players || !Mpris.players.values) return [];
+        return Mpris.players.values;
+    }
 
     readonly property var activePlayer: {
-        if (!Mpris.players || Mpris.players.values.length === 0) return null;
-        for (let i = 0; i < Mpris.players.values.length; i++) {
-            let p = Mpris.players.values[i];
-            if (p.playbackState === MprisPlaybackState.Playing) return p;
+        if (root.playerList.length === 0) return null;
+        if (root.selectedPlayerIdx >= 0 && root.selectedPlayerIdx < root.playerList.length) {
+            return root.playerList[root.selectedPlayerIdx];
         }
-        return Mpris.players.values[0];
+        for (let i = 0; i < root.playerList.length; i++) {
+            if (root.playerList[i].playbackState === MprisPlaybackState.Playing) return root.playerList[i];
+        }
+        return root.playerList[0];
     }
 
     readonly property bool hasMedia: activePlayer !== null && (activePlayer.trackTitle !== "" || activePlayer.playbackState === MprisPlaybackState.Playing)
     readonly property bool isPlaying: activePlayer ? activePlayer.playbackState === MprisPlaybackState.Playing : false
     readonly property string title: activePlayer ? (activePlayer.trackTitle || "No Media Playing") : "No Media Playing"
     readonly property string artist: {
-        if (!activePlayer || !activePlayer.trackArtists) return "Music";
+        if (!activePlayer || !activePlayer.trackArtists) return "Audio";
         if (Array.isArray(activePlayer.trackArtists)) return activePlayer.trackArtists.join(", ");
-        return activePlayer.trackArtists.toString() || "Music";
+        return activePlayer.trackArtists.toString() || "Audio";
     }
     readonly property string artUrl: activePlayer ? (activePlayer.trackArtUrl || "") : ""
 
-    RowLayout {
-        anchors.fill: parent
-        spacing: 16
+    // Normalize track length (converts microseconds to seconds if > 100000)
+    readonly property real trackLengthSecs: {
+        if (!activePlayer) return 0;
+        let l = activePlayer.length || 0;
+        return l > 100000 ? (l / 1000000.0) : l;
+    }
 
-        // Large Album Art with rounded corners & source badge (Reference 1)
-        Rectangle {
-            id: artBox
-            implicitWidth: 84
-            implicitHeight: 84
-            radius: 14
-            color: Qt.rgba(1, 1, 1, 0.08)
-            border.color: Qt.rgba(1, 1, 1, 0.12)
-            border.width: 1
-            clip: true
-            Layout.alignment: Qt.AlignVCenter
+    // High-precision interpolated position tracker
+    property real basePosSecs: 0
+    property real lastSyncEpoch: Date.now()
+    property real displayPositionSecs: 0
 
-            Image {
-                anchors.fill: parent
-                source: root.artUrl
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                visible: root.artUrl !== "" && status === Image.Ready
-            }
+    function syncPositionFromPlayer() {
+        if (!activePlayer) {
+            basePosSecs = 0;
+            displayPositionSecs = 0;
+            return;
+        }
+        let raw = activePlayer.position || 0;
+        let p = raw > 100000 ? (raw / 1000000.0) : raw;
+        basePosSecs = p;
+        lastSyncEpoch = Date.now();
+        displayPositionSecs = p;
+    }
 
-            // Fallback vinyl icon if no album art loaded
-            Rectangle {
-                anchors.fill: parent
-                color: Qt.rgba(0.1, 0.1, 0.15, 0.8)
-                visible: root.artUrl === "" || artBox.children[0].status !== Image.Ready
+    // Sync whenever activePlayer or track changes
+    onActivePlayerChanged: syncPositionFromPlayer()
+    onTitleChanged: syncPositionFromPlayer()
 
-                Text {
-                    anchors.centerIn: parent
-                    text: ""
-                    color: root.isPlaying ? Config.actFg : Config.dimFg
-                    font.family: Config.fontFamily
-                    font.pixelSize: 32
+    Connections {
+        target: root.activePlayer
+        function onPositionChanged() {
+            root.syncPositionFromPlayer();
+        }
+        function onPlaybackStateChanged() {
+            root.syncPositionFromPlayer();
+        }
+    }
+
+    // Smooth real-time position clock (interpolates every 250ms when playing)
+    Timer {
+        id: positionClock
+        interval: 250
+        repeat: true
+        running: root.isPlaying && Config.notchVisible
+        onTriggered: {
+            if (root.isPlaying) {
+                let elapsed = (Date.now() - root.lastSyncEpoch) / 1000.0;
+                let cur = root.basePosSecs + elapsed;
+                if (root.trackLengthSecs > 0) {
+                    cur = Math.min(cur, root.trackLengthSecs);
                 }
+                root.displayPositionSecs = cur;
             }
+        }
+    }
 
-            // Floating app identity badge (e.g. music note in bottom right corner)
-            Rectangle {
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.margins: 4
-                width: 18
-                height: 18
-                radius: 5
-                color: root.isPlaying ? Config.actBg : Config.subPillBg
-                border.color: Config.subPillBorder
-                border.width: 1
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "󰎆"
-                    color: "#ffffff"
-                    font.family: Config.fontFamily
-                    font.pixelSize: 10
+    // Periodic sync heartbeat to correct any drift
+    Timer {
+        interval: 3000
+        repeat: true
+        running: Config.notchVisible && root.isPlaying
+        onTriggered: {
+            // Re-sync with actual MPRIS source to eliminate clock drift
+            if (root.activePlayer) {
+                let raw = root.activePlayer.position || 0;
+                let p = raw > 100000 ? (raw / 1000000.0) : raw;
+                if (Math.abs(p - root.displayPositionSecs) > 1.2) {
+                    root.syncPositionFromPlayer();
                 }
             }
         }
+    }
 
-        // Center: Track Title, Artist, and Transport Controls (Reference 1)
+    readonly property real progressFrac: trackLengthSecs > 0 ? Math.min(1.0, Math.max(0.0, displayPositionSecs / trackLengthSecs)) : 0.0
+
+    // Format seconds to mm:ss or hh:mm:ss
+    function formatTime(s) {
+        if (isNaN(s) || s < 0) return "0:00";
+        let total = Math.floor(s);
+        let hrs = Math.floor(total / 3600);
+        let mins = Math.floor((total % 3600) / 60);
+        let secs = total % 60;
+        let padSecs = (secs < 10 ? "0" : "") + secs;
+
+        if (hrs > 0) {
+            let padMins = (mins < 10 ? "0" : "") + mins;
+            return hrs + ":" + padMins + ":" + padSecs;
+        }
+        return mins + ":" + padSecs;
+    }
+
+    // Seek helper using playerctl for rock-solid browser / system seek
+    function seekToSeconds(targetSecs) {
+        if (!activePlayer) return;
+        let clamped = Math.max(0, root.trackLengthSecs > 0 ? Math.min(targetSecs, root.trackLengthSecs) : targetSecs);
+        root.basePosSecs = clamped;
+        root.displayPositionSecs = clamped;
+        root.lastSyncEpoch = Date.now();
+
+        // Native MPRIS seek if supported, backed by playerctl for browser compatibility
+        let identity = (activePlayer.identity || "").toLowerCase();
+        let nameParam = identity.includes("brave") ? "brave" : (identity.includes("firefox") ? "firefox" : (identity.includes("chromium") ? "chromium" : (identity.includes("chrome") ? "chrome" : "")));
+        if (nameParam !== "") {
+            Config.run("playerctl -p " + nameParam + " position " + Math.round(clamped));
+        } else {
+            Config.run("playerctl position " + Math.round(clamped));
+        }
+    }
+
+    function seekOffset(offsetSecs) {
+        if (!activePlayer) return;
+        let target = root.displayPositionSecs + offsetSecs;
+        seekToSeconds(target);
+    }
+
+    RowLayout {
+        anchors.fill: parent
+        spacing: 20
+
+        // =====================================================================
+        // LEFT HALF: Full Active Media Player
+        // =====================================================================
         ColumnLayout {
+            Layout.preferredWidth: 340
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignVCenter
-            spacing: 6
+            Layout.fillHeight: true
+            spacing: 12
 
-            // Track Title
-            Item {
-                id: titleContainer
-                Layout.fillWidth: true
-                implicitHeight: titleTxt.implicitHeight
-                clip: true
-
-                readonly property bool needsScroll: titleTxt.paintedWidth > width
-                readonly property real scrollDistance: Math.max(0, titleTxt.paintedWidth - width + 24)
-
-                Text {
-                    id: titleTxt
-                    x: 0
-                    text: root.title
-                    color: Config.mainFg
-                    font.family: Config.fontFamily
-                    font.pixelSize: 14
-                    font.weight: Font.DemiBold
-                    elide: titleContainer.needsScroll ? Text.ElideNone : Text.ElideRight
-
-                    onTextChanged: {
-                        x = 0;
-                        if (titleContainer.needsScroll && marqueeSeq.running) marqueeSeq.restart();
-                    }
-                }
-
-                SequentialAnimation {
-                    id: marqueeSeq
-                    running: titleContainer.needsScroll && Config.notchVisible
-                    loops: Animation.Infinite
-
-                    PauseAnimation { duration: 1800 }
-                    NumberAnimation {
-                        target: titleTxt
-                        property: "x"
-                        from: 0
-                        to: -titleContainer.scrollDistance
-                        duration: Math.max(1200, titleContainer.scrollDistance * 32)
-                        easing.type: Easing.Linear
-                    }
-                    PauseAnimation { duration: 1600 }
-                    NumberAnimation {
-                        target: titleTxt
-                        property: "x"
-                        from: -titleContainer.scrollDistance
-                        to: 0
-                        duration: 600
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
-
-            // Artist Name
-            Text {
-                text: root.artist
-                color: Config.dimFg
-                font.family: Config.fontFamily
-                font.pixelSize: 12
-                Layout.fillWidth: true
-                elide: Text.ElideRight
-            }
-
-            // Transport Controls (Reference 1: <<  ||  >>)
+            // Top Row: Album Artwork + Title/Artist
             RowLayout {
-                spacing: 12
-                Layout.topMargin: 4
+                Layout.fillWidth: true
+                spacing: 14
 
-                // Prev
+                // Album Art thumbnail with adaptive squircle
                 Rectangle {
-                    implicitWidth: 28
-                    implicitHeight: 28
-                    radius: 14
-                    color: prevM.pressed ? Qt.rgba(1, 1, 1, 0.2) : (prevM.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
-                    scale: prevM.pressed ? 0.90 : 1.0
+                    implicitWidth: 72
+                    implicitHeight: 72
+                    radius: 16
+                    color: Qt.rgba(1, 1, 1, 0.08)
+                    border.color: Qt.rgba(1, 1, 1, 0.12)
+                    border.width: 1
+                    clip: true
+                    Layout.alignment: Qt.AlignVCenter
+
+                    Image {
+                        anchors.fill: parent
+                        source: root.artUrl
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        visible: root.artUrl !== "" && status === Image.Ready
+                    }
+
+                    // Fallback artwork
+                    Rectangle {
+                        anchors.fill: parent
+                        visible: root.artUrl === "" || (root.artUrl !== "" && parent.children[0].status !== Image.Ready)
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "#2c3e50" }
+                            GradientStop { position: 1.0; color: "#000000" }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: ""
+                            color: root.isPlaying ? Config.actBg : Config.dimFg
+                            font.family: Config.iconFont
+                            font.pixelSize: 26
+                        }
+                    }
+                }
+
+                // Title & Artist
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: 4
+
+                    Text {
+                        text: root.title
+                        color: Config.mainFg
+                        font.family: Config.bodyFont
+                        font.pixelSize: 14
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    Text {
+                        text: root.artist
+                        color: Config.dimFg
+                        font.family: Config.bodyFont
+                        font.pixelSize: 12
+                        font.weight: Font.Normal
+                        elide: Text.ElideRight
+                        Layout.fillWidth: true
+                    }
+
+                    // Active playing indicator
+                    RowLayout {
+                        spacing: 4
+                        visible: root.isPlaying
+
+                        Text {
+                            text: "󰎆 Playing"
+                            color: Config.actBg
+                            font.family: Config.bodyFont
+                            font.pixelSize: 10
+                            font.weight: Font.Medium
+                        }
+                    }
+                }
+            }
+
+            // Scrubber Progress Bar
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                // Interactive Progress Track
+                Rectangle {
+                    id: scrubTrack
+                    Layout.fillWidth: true
+                    implicitHeight: 6
+                    radius: 3
+                    color: Qt.rgba(1, 1, 1, 0.12)
+
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: Math.max(0, Math.min(parent.width, parent.width * root.progressFrac))
+                        radius: parent.radius
+                        color: Config.actBg
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: (mouse) => {
+                            if (root.activePlayer && root.trackLengthSecs > 0) {
+                                let ratio = Math.max(0.0, Math.min(1.0, mouse.x / width));
+                                root.seekToSeconds(ratio * root.trackLengthSecs);
+                            }
+                        }
+                    }
+                }
+
+                // Elapsed & Remaining Timestamps
+                RowLayout {
+                    Layout.fillWidth: true
+
+                    Text {
+                        text: root.formatTime(root.displayPositionSecs)
+                        color: Config.dimFg
+                        font.family: Config.monoFont
+                        font.pixelSize: 10
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    Text {
+                        text: root.trackLengthSecs > 0 ? root.formatTime(root.trackLengthSecs) : "--:--"
+                        color: Config.dimFg
+                        font.family: Config.monoFont
+                        font.pixelSize: 10
+                    }
+                }
+            }
+
+            // Transport Controls: [ 10s Rewind ] [ Prev ] [ Play/Pause ] [ Next ] [ 10s Forward ]
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 12
+
+                // Rewind 10s
+                Rectangle {
+                    implicitWidth: 30
+                    implicitHeight: 30
+                    radius: 15
+                    color: r10M.pressed ? Qt.rgba(1, 1, 1, 0.20) : (r10M.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰑋"
+                        color: Config.mainFg
+                        font.family: Config.iconFont
+                        font.pixelSize: 14
+                    }
+
+                    MouseArea {
+                        id: r10M
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.seekOffset(-10);
+                        }
+                    }
+                }
+
+                // Previous
+                Rectangle {
+                    implicitWidth: 32
+                    implicitHeight: 32
+                    radius: 16
+                    color: prevM.pressed ? Qt.rgba(1, 1, 1, 0.20) : (prevM.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰒮"
                         color: Config.mainFg
-                        font.family: Config.fontFamily
-                        font.pixelSize: 14
+                        font.family: Config.iconFont
+                        font.pixelSize: 15
                     }
 
                     MouseArea {
@@ -186,35 +365,29 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (root.activePlayer) root.activePlayer.previous();
+                            if (root.activePlayer && root.activePlayer.canGoPrevious) {
+                                root.activePlayer.previous();
+                            }
                         }
-                    }
-
-                    StyledTooltip {
-                        text: "Previous Track"
-                        visible: prevM.containsMouse
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: Config.activeAnchorEdge === "bottom" ? (-implicitHeight - 8) : (parent.height + 8)
                     }
                 }
 
-                // Play / Pause
+                // Play / Pause (Large Primary Button)
                 Rectangle {
-                    implicitWidth: 32
-                    implicitHeight: 32
-                    radius: 16
-                    color: root.isPlaying ? Config.actBg : Qt.rgba(1, 1, 1, 0.14)
-                    border.color: root.isPlaying ? "transparent" : Config.subPillBorder
+                    implicitWidth: 42
+                    implicitHeight: 42
+                    radius: 21
+                    color: playM.pressed ? Qt.darker(Config.actBg, 1.2) : (playM.containsMouse ? Qt.lighter(Config.actBg, 1.1) : (root.isPlaying ? Config.actBg : Qt.rgba(1, 1, 1, 0.15)))
+                    border.color: root.isPlaying ? "transparent" : Qt.rgba(1, 1, 1, 0.20)
                     border.width: 1
-                    scale: playM.pressed ? 0.92 : 1.0
 
                     Text {
                         anchors.centerIn: parent
                         anchors.horizontalCenterOffset: root.isPlaying ? 0 : 1
                         text: root.isPlaying ? "󰏤" : "󰐊"
-                        color: Config.actFg
-                        font.family: Config.fontFamily
-                        font.pixelSize: 15
+                        color: "#ffffff"
+                        font.family: Config.iconFont
+                        font.pixelSize: 18
                     }
 
                     MouseArea {
@@ -233,29 +406,21 @@ Item {
                             }
                         }
                     }
-
-                    StyledTooltip {
-                        text: root.isPlaying ? "Pause" : "Play"
-                        visible: playM.containsMouse
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: Config.activeAnchorEdge === "bottom" ? (-implicitHeight - 8) : (parent.height + 8)
-                    }
                 }
 
                 // Next
                 Rectangle {
-                    implicitWidth: 28
-                    implicitHeight: 28
-                    radius: 14
-                    color: nextM.pressed ? Qt.rgba(1, 1, 1, 0.2) : (nextM.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
-                    scale: nextM.pressed ? 0.90 : 1.0
+                    implicitWidth: 32
+                    implicitHeight: 32
+                    radius: 16
+                    color: nextM.pressed ? Qt.rgba(1, 1, 1, 0.20) : (nextM.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
 
                     Text {
                         anchors.centerIn: parent
                         text: "󰒭"
                         color: Config.mainFg
-                        font.family: Config.fontFamily
-                        font.pixelSize: 14
+                        font.family: Config.iconFont
+                        font.pixelSize: 15
                     }
 
                     MouseArea {
@@ -264,53 +429,171 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (root.activePlayer) root.activePlayer.next();
+                            if (root.activePlayer && root.activePlayer.canGoNext) {
+                                root.activePlayer.next();
+                            }
                         }
                     }
+                }
 
-                    StyledTooltip {
-                        text: "Next Track"
-                        visible: nextM.containsMouse
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        y: Config.activeAnchorEdge === "bottom" ? (-implicitHeight - 8) : (parent.height + 8)
+                // Forward 10s
+                Rectangle {
+                    implicitWidth: 30
+                    implicitHeight: 30
+                    radius: 15
+                    color: f10M.pressed ? Qt.rgba(1, 1, 1, 0.20) : (f10M.containsMouse ? Qt.rgba(1, 1, 1, 0.10) : "transparent")
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰑋"
+                        scale: -1
+                        color: Config.mainFg
+                        font.family: Config.iconFont
+                        font.pixelSize: 14
+                    }
+
+                    MouseArea {
+                        id: f10M
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.seekOffset(10);
+                        }
                     }
                 }
             }
         }
 
-        // Right side: Audio Equalizer Waveform bars (Reference 1)
-        RowLayout {
-            spacing: 3
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-            Layout.rightMargin: 8
+        // Vertical divider
+        Rectangle {
+            Layout.fillHeight: true
+            width: 1
+            color: Qt.rgba(1, 1, 1, 0.08)
+        }
 
-            Repeater {
-                model: 4
+        // =====================================================================
+        // RIGHT HALF: Multi-Source Switcher (All Active Players / Tabs)
+        // =====================================================================
+        ColumnLayout {
+            Layout.preferredWidth: 230
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 8
 
-                Rectangle {
-                    id: waveBar
+            // Header
+            RowLayout {
+                Layout.fillWidth: true
+
+                Text {
+                    text: "MEDIA SOURCES"
+                    color: Config.dimFg
+                    font.family: Config.bodyFont
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                    font.letterSpacing: 0.8
+                }
+
+                Item { Layout.fillWidth: true }
+
+                Text {
+                    text: root.playerList.length + " active"
+                    color: Config.dimFg
+                    font.family: Config.monoFont
+                    font.pixelSize: 10
+                }
+            }
+
+            // Player List
+            ListView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                spacing: 8
+                model: root.playerList
+
+                delegate: Rectangle {
+                    id: pRow
+                    required property var modelData
                     required property int index
-                    width: 3
-                    radius: 2
-                    color: root.isPlaying ? Config.actBg : Config.dimFg
+                    width: ListView.view.width
+                    implicitHeight: 46
+                    radius: 10
 
-                    height: 8
+                    readonly property bool isSelected: root.activePlayer === pRow.modelData
+                    readonly property bool isThisPlaying: pRow.modelData.playbackState === MprisPlaybackState.Playing
 
-                    SequentialAnimation on height {
-                        running: root.isPlaying
-                        loops: Animation.Infinite
+                    color: isSelected ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.18) : (pMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.06) : Qt.rgba(1, 1, 1, 0.03))
+                    border.color: isSelected ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.45) : Qt.rgba(1, 1, 1, 0.06)
+                    border.width: 1
 
-                        NumberAnimation {
-                            to: 10 + (waveBar.index * 4)
-                            duration: 220 + (waveBar.index * 60)
-                            easing.type: Easing.InOutQuad
+                    Behavior on color { ColorAnimation { duration: 120 } }
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 10
+                        anchors.rightMargin: 10
+                        spacing: 8
+
+                        // Status Dot / Play Icon
+                        Text {
+                            text: pRow.isThisPlaying ? "󰐊" : "󰏤"
+                            color: pRow.isThisPlaying ? Config.actBg : Config.dimFg
+                            font.family: Config.iconFont
+                            font.pixelSize: 12
+                            Layout.alignment: Qt.AlignVCenter
                         }
-                        NumberAnimation {
-                            to: 6 + ((3 - waveBar.index) * 3)
-                            duration: 240 + (waveBar.index * 50)
-                            easing.type: Easing.InOutQuad
+
+                        // Title & Player Name
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 1
+
+                            Text {
+                                text: pRow.modelData.trackTitle || "Media Stream"
+                                color: pRow.isSelected ? "#ffffff" : Config.mainFg
+                                font.family: Config.bodyFont
+                                font.pixelSize: 12
+                                font.weight: pRow.isSelected ? Font.DemiBold : Font.Normal
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                text: {
+                                    let art = pRow.modelData.trackArtists;
+                                    let str = Array.isArray(art) ? art.join(", ") : (art || "");
+                                    return str !== "" ? str : (pRow.modelData.identity || "Browser");
+                                }
+                                color: Config.dimFg
+                                font.family: Config.bodyFont
+                                font.pixelSize: 10
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
                         }
                     }
+
+                    MouseArea {
+                        id: pMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.selectedPlayerIdx = pRow.index;
+                        }
+                    }
+                }
+
+                // Empty state if no media sources detected
+                Text {
+                    anchors.centerIn: parent
+                    text: "No active media"
+                    color: Config.dimFg
+                    font.family: Config.bodyFont
+                    font.pixelSize: 11
+                    visible: root.playerList.length === 0
                 }
             }
         }
