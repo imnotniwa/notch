@@ -147,6 +147,7 @@ Rectangle {
     CompactMediaPill {
         id: compactMediaPill
         anchors.centerIn: parent
+        z: 20
         visible: !root.isExpanded && root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner
         opacity: (!root.isExpanded && root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner) ? 1.0 : 0.0
 
@@ -236,12 +237,12 @@ Rectangle {
         }
     }
 
-    // Click anywhere on Island to toggle Full Deck
+    // Click anywhere on Island to toggle Tier 1 Expanded Deck
     MouseArea {
         anchors.fill: parent
-        // In compact mode, capture clicks across the whole bar so child items don't intercept it.
-        // In rich media / notification banner / expanded deck, put z: -1 so child buttons (media transport, notification actions, tabs, etc.) receive clicks.
-        z: (!root.isExpanded && !root.hasActiveMedia && !root.isNotificationBanner) ? 10 : -1
+        // When not expanded (compact glance mode, compact media pill, etc.), capture clicks with z: 10
+        // so clicking anywhere opens Tier 1. When expanded, set z: -1 so child controls work normally.
+        z: !root.isExpanded ? 10 : -1
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             Config.isDeckOpen = !Config.isDeckOpen;

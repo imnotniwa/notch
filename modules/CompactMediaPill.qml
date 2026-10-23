@@ -175,6 +175,7 @@ Item {
             border.width: 1
             scale: playMouse.pressed ? 0.88 : 1.0
             Layout.alignment: Qt.AlignVCenter
+            z: 20
 
             Behavior on scale {
                 NumberAnimation { duration: playMouse.pressed ? 60 : 180; easing.type: playMouse.pressed ? Easing.OutQuad : Easing.OutBack; easing.overshoot: 1.15 }
@@ -195,13 +196,16 @@ Item {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    if (!root.activePlayer) return;
-                    if (typeof root.activePlayer.togglePlaying === "function") {
-                        root.activePlayer.togglePlaying();
-                    } else if (root.isPlaying) {
-                        root.activePlayer.pause();
+                    if (root.activePlayer) {
+                        let id = (root.activePlayer.identity || "").toLowerCase();
+                        let p = id.includes("brave") ? "brave" : (id.includes("firefox") ? "firefox" : (id.includes("chromium") ? "chromium" : (id.includes("chrome") ? "chrome" : "")));
+                        if (p !== "") {
+                            Config.run("playerctl -p " + p + " play-pause");
+                        } else {
+                            Config.run("playerctl play-pause");
+                        }
                     } else {
-                        root.activePlayer.play();
+                        Config.run("playerctl play-pause");
                     }
                 }
             }
