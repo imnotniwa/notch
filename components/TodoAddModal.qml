@@ -155,6 +155,7 @@ Item {
                     font.pixelSize: 13
                     selectByMouse: true
                     clip: true
+                    activeFocusOnTab: false
 
                     Text {
                         anchors.fill: parent
@@ -166,15 +167,25 @@ Item {
                         visible: taskTextInput.text === "" && !taskTextInput.activeFocus
                     }
 
+                    // Press Enter to submit immediately if title is present
                     onAccepted: {
-                        if (timeInput.text.trim() === "") {
-                            timeInput.forceActiveFocus();
-                        } else {
-                            root.submitTask();
-                        }
+                        root.submitTask();
                     }
 
-                    Keys.onEscapePressed: root.closeModal()
+                    Keys.onTabPressed: (event) => {
+                        timeInput.forceActiveFocus();
+                        event.accepted = true;
+                    }
+
+                    Keys.onDownPressed: (event) => {
+                        timeInput.forceActiveFocus();
+                        event.accepted = true;
+                    }
+
+                    Keys.onEscapePressed: (event) => {
+                        root.closeModal();
+                        event.accepted = true;
+                    }
                 }
             }
 
@@ -198,6 +209,7 @@ Item {
                     font.pixelSize: 12
                     selectByMouse: true
                     clip: true
+                    activeFocusOnTab: false
 
                     Text {
                         anchors.fill: parent
@@ -213,7 +225,25 @@ Item {
                         root.submitTask();
                     }
 
-                    Keys.onEscapePressed: root.closeModal()
+                    Keys.onTabPressed: (event) => {
+                        taskTextInput.forceActiveFocus();
+                        event.accepted = true;
+                    }
+
+                    Keys.onBacktabPressed: (event) => {
+                        taskTextInput.forceActiveFocus();
+                        event.accepted = true;
+                    }
+
+                    Keys.onUpPressed: (event) => {
+                        taskTextInput.forceActiveFocus();
+                        event.accepted = true;
+                    }
+
+                    Keys.onEscapePressed: (event) => {
+                        root.closeModal();
+                        event.accepted = true;
+                    }
                 }
             }
 
