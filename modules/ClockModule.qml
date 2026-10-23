@@ -35,5 +35,10 @@ Item {
         text: root.timeStr + " • " + root.compactDateStr
         tooltip: root.compactMode ? "" : root.dateStr
         isMonoFont: true
+        onClicked: {
+            if (root.compactMode) {
+                Config.isDeckOpen = true;
+            }
+        }
     }
 }

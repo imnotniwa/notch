@@ -147,7 +147,6 @@ Rectangle {
     CompactMediaPill {
         id: compactMediaPill
         anchors.centerIn: parent
-        z: 20
         visible: !root.isExpanded && root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner
         opacity: (!root.isExpanded && root.hasActiveMedia && !root.isPowerBanner && !root.isNotificationBanner) ? 1.0 : 0.0
 

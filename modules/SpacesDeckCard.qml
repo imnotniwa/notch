@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Widgets
@@ -10,31 +11,27 @@ import ".."
 Item {
     id: root
 
-    implicitWidth: 520
-    implicitHeight: 96
+    implicitWidth: 600
+    implicitHeight: 228
 
     // State bindings
     readonly property int activeWsId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
     readonly property string focusedMonName: Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""
-    
-    // Inspected workspace ID (clicking workspace pills previews its windows without moving focus)
+
+    // Currently inspected workspace ID
     property int selectedWsId: activeWsId
 
-    // Auto-sync selectedWsId if activeWsId changes externally, unless user explicitly selected one
     onActiveWsIdChanged: {
         selectedWsId = activeWsId;
     }
 
-    // Scratchpad state
-    property bool isScratchpadActive: false
-    property var occupiedWsIds: []
+    property var occupiedWsIds: ({})
     property var activeSpaceWindows: []
 
     function refreshSpacesData() {
         Hyprland.refreshWorkspaces();
         Hyprland.refreshToplevels();
 
-        // Calculate occupied workspaces
         let occupied = {};
         let currentWins = [];
         let viewWs = root.selectedWsId;
@@ -70,9 +67,9 @@ Item {
     }
 
     Timer {
-        interval: 3000
+        interval: 2000
         repeat: true
-        running: Config.expanded && Config.galleryIndex === 1
+        running: Config.expanded && Config.galleryIndex === 2
         triggeredOnStart: true
         onTriggered: root.refreshSpacesData()
     }
@@ -83,23 +80,23 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 8
+        spacing: 12
 
         // =====================================================================
-        // Row 1: Workspace Strip, Scratchpad, and Monitor Info
+        // Top Navigation Strip: Workspace Pills & Scratchpad
         // =====================================================================
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 30
-            spacing: 8
+            Layout.preferredHeight: 32
+            spacing: 10
 
             // Workspaces Capsule Bar
             Rectangle {
-                implicitHeight: 28
+                implicitHeight: 32
                 implicitWidth: wsRow.implicitWidth + 12
-                radius: 14
-                color: Config.subPillBg
-                border.color: Config.subPillBorder
+                radius: 16
+                color: Qt.rgba(1, 1, 1, 0.06)
+                border.color: Qt.rgba(1, 1, 1, 0.08)
                 border.width: 1
 
                 RowLayout {
@@ -113,43 +110,40 @@ Item {
                         Rectangle {
                             id: wsPill
                             required property int modelData
-                            readonly property bool isSelected: root.selectedWsId === modelData
-                            readonly property bool isCurrentFocused: root.activeWsId === modelData
+                            readonly property bool isInspected: root.selectedWsId === modelData
+                            readonly property bool isCurrentDesktop: root.activeWsId === modelData
                             readonly property bool isOccupied: !!(root.occupiedWsIds && root.occupiedWsIds[modelData])
-                            
-                            // Visual properties
-                            implicitWidth: isSelected ? 28 : (isOccupied ? 24 : 20)
-                            implicitHeight: 20
-                            radius: 10
 
-                            scale: wsMouse.pressed ? 0.90 : 1.0
-                            Behavior on scale {
-                                NumberAnimation { duration: 100 }
-                            }
+                            implicitWidth: isInspected ? 36 : (isOccupied ? 28 : 24)
+                            implicitHeight: 24
+                            radius: 12
 
-                            color: isSelected ? Config.actBg : (wsMouse.containsMouse ? Config.hvrBg : "transparent")
-                            border.color: isSelected ? "transparent" : (isCurrentFocused ? Qt.rgba(1, 1, 1, 0.3) : (isOccupied ? Qt.rgba(1, 1, 1, 0.12) : "transparent"))
+                            color: isInspected ? Config.actBg : (wsMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.12) : "transparent")
+                            border.color: isInspected ? "transparent" : (isCurrentDesktop ? Qt.rgba(1, 1, 1, 0.35) : "transparent")
                             border.width: 1
+
+                            Behavior on implicitWidth { NumberAnimation { duration: 160; easing.type: Easing.OutQuad } }
+                            Behavior on color { ColorAnimation { duration: 120 } }
 
                             RowLayout {
                                 anchors.centerIn: parent
-                                spacing: 2
+                                spacing: 3
 
                                 Text {
                                     text: wsPill.modelData.toString()
-                                    color: wsPill.isSelected ? Config.actFg : (wsMouse.containsMouse ? Config.hvrFg : (wsPill.isOccupied ? Config.mainFg : Qt.rgba(1, 1, 1, 0.35)))
-                                    font.family: Config.monoFont
+                                    color: wsPill.isInspected ? "#ffffff" : (wsPill.isOccupied ? Config.mainFg : Qt.rgba(1, 1, 1, 0.35))
+                                    font.family: Config.bodyFont
                                     font.pixelSize: 11
-                                    font.weight: wsPill.isSelected ? Font.Bold : Font.Normal
+                                    font.weight: wsPill.isInspected || wsPill.isCurrentDesktop ? Font.Bold : Font.Normal
                                 }
 
-                                // Occupancy dot
+                                // Occupancy indicator dot
                                 Rectangle {
-                                    visible: !wsPill.isSelected && wsPill.isOccupied
-                                    implicitWidth: 3
-                                    implicitHeight: 3
+                                    visible: !wsPill.isInspected && wsPill.isOccupied
+                                    width: 3
+                                    height: 3
                                     radius: 1.5
-                                    color: wsPill.isCurrentFocused ? Config.actFg : Qt.rgba(1, 1, 1, 0.5)
+                                    color: wsPill.isCurrentDesktop ? Config.actBg : Qt.rgba(1, 1, 1, 0.6)
                                 }
                             }
 
@@ -159,7 +153,6 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    // Switch inspected workspace in the deck without moving desktop focus
                                     root.selectedWsId = wsPill.modelData;
                                     root.refreshSpacesData();
                                 }
@@ -171,209 +164,227 @@ Item {
 
             // Scratchpad Toggle Capsule
             Rectangle {
-                implicitHeight: 28
-                implicitWidth: scratchRow.implicitWidth + 14
-                radius: 14
-                color: (root.occupiedWsIds && root.occupiedWsIds[-99]) ? Qt.rgba(0.9, 0.6, 0.2, 0.18) : Config.subPillBg
-                border.color: (root.occupiedWsIds && root.occupiedWsIds[-99]) ? Qt.rgba(0.9, 0.6, 0.2, 0.35) : Config.subPillBorder
+                implicitHeight: 32
+                implicitWidth: scratchRow.implicitWidth + 16
+                radius: 16
+                readonly property bool hasScratch: !!(root.occupiedWsIds && root.occupiedWsIds[-99])
+                color: hasScratch ? Qt.rgba(1, 0.62, 0.04, 0.18) : Qt.rgba(1, 1, 1, 0.06)
+                border.color: hasScratch ? Qt.rgba(1, 0.62, 0.04, 0.4) : Qt.rgba(1, 1, 1, 0.08)
                 border.width: 1
 
                 RowLayout {
                     id: scratchRow
                     anchors.centerIn: parent
-                    spacing: 5
+                    spacing: 6
 
                     Text {
                         text: "󰊠"
                         font.family: Config.iconFont
-                        font.pixelSize: 12
-                        color: (root.occupiedWsIds && root.occupiedWsIds[-99]) ? "#f39c12" : Config.mainFg
+                        font.pixelSize: 13
+                        color: parent.parent.hasScratch ? "#ff9f0a" : Config.mainFg
                     }
 
                     Text {
-                        text: "Scratchpad"
+                        text: "Scratchpad" + (parent.parent.hasScratch ? " (" + root.occupiedWsIds[-99] + ")" : "")
                         font.family: Config.bodyFont
                         font.pixelSize: 11
-                        font.weight: Font.Medium
-                        color: (root.occupiedWsIds && root.occupiedWsIds[-99]) ? "#f39c12" : Config.mainFg
+                        font.weight: Font.DemiBold
+                        color: parent.parent.hasScratch ? "#ff9f0a" : Config.mainFg
                     }
                 }
 
                 MouseArea {
-                    id: scratchMouse
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: HyprlandLua.toggleSpecialWorkspace()
+                    onClicked: {
+                        root.selectedWsId = -99;
+                        root.refreshSpacesData();
+                    }
                 }
             }
 
             Item { Layout.fillWidth: true }
 
-            // Monitor & Window Stats
+            // Switch Whole Desktop to Selected Space Button
             Rectangle {
-                implicitHeight: 24
-                implicitWidth: monRow.implicitWidth + 12
-                radius: 12
-                color: Qt.rgba(1, 1, 1, 0.05)
+                implicitHeight: 28
+                implicitWidth: switchText.implicitWidth + 18
+                radius: 14
+                visible: root.selectedWsId !== root.activeWsId && root.selectedWsId !== -99
+                color: switchM.pressed ? Qt.darker(Config.actBg, 1.2) : (switchM.containsMouse ? Qt.lighter(Config.actBg, 1.1) : Config.actBg)
 
-                RowLayout {
-                    id: monRow
+                Text {
+                    id: switchText
                     anchors.centerIn: parent
-                    spacing: 6
+                    text: "Jump to Space " + root.selectedWsId + " ↗"
+                    color: "#ffffff"
+                    font.family: Config.bodyFont
+                    font.pixelSize: 11
+                    font.weight: Font.DemiBold
+                }
 
-                    Text {
-                        text: "󰍹"
-                        font.family: Config.iconFont
-                        font.pixelSize: 11
-                        color: Qt.rgba(1, 1, 1, 0.6)
-                    }
-
-                    Text {
-                        text: (root.focusedMonName !== "" ? root.focusedMonName : "Monitor") + " • " + root.activeSpaceWindows.length + " win"
-                        font.family: Config.bodyFont
-                        font.pixelSize: 10
-                        font.weight: Font.Medium
-                        color: Qt.rgba(1, 1, 1, 0.75)
+                MouseArea {
+                    id: switchM
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        Config.run("hyprctl dispatch workspace " + root.selectedWsId);
                     }
                 }
             }
         }
 
         // =====================================================================
-        // Row 2: Windows on Active Workspace (Mission Control Deck)
+        // Main Area: Mission Control Interactive Window Cards Grid
         // =====================================================================
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            radius: 12
-            color: Config.subPillBg
-            border.color: Config.subPillBorder
+            radius: 16
+            color: Qt.rgba(1, 1, 1, 0.03)
+            border.color: Qt.rgba(1, 1, 1, 0.06)
             border.width: 1
             clip: true
 
-            // When windows exist in space
+            // Empty state if no windows in this workspace
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: 8
+                visible: root.activeSpaceWindows.length === 0
+
+                Text {
+                    text: "󰍺"
+                    font.family: Config.iconFont
+                    font.pixelSize: 32
+                    color: Qt.rgba(1, 1, 1, 0.2)
+                    Layout.alignment: Qt.AlignHCenter
+                }
+
+                Text {
+                    text: "No active windows in " + (root.selectedWsId === -99 ? "Scratchpad" : "Space " + root.selectedWsId)
+                    font.family: Config.bodyFont
+                    font.pixelSize: 12
+                    font.weight: Font.Medium
+                    color: Qt.rgba(1, 1, 1, 0.4)
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+
+            // Grid of Window Cards (Mission Control Style)
             Flickable {
                 anchors.fill: parent
-                anchors.margins: 6
-                contentWidth: winRow.implicitWidth
-                contentHeight: height
+                anchors.margins: 10
+                contentWidth: width
+                contentHeight: winGrid.implicitHeight
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
-                RowLayout {
-                    id: winRow
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: 6
-
-                    // Empty state prompt
-                    Item {
-                        visible: root.activeSpaceWindows.length === 0
-                        implicitWidth: emptyRow.implicitWidth
-                        implicitHeight: 34
-
-                        RowLayout {
-                            id: emptyRow
-                            anchors.centerIn: parent
-                            spacing: 8
-
-                            Text {
-                                text: "No active windows in Space " + root.selectedWsId
-                                font.family: Config.bodyFont
-                                font.pixelSize: 11
-                                color: Qt.rgba(1, 1, 1, 0.4)
-                            }
-
-                            Rectangle {
-                                implicitWidth: launchText.implicitWidth + 12
-                                implicitHeight: 22
-                                radius: 11
-                                color: Qt.rgba(1, 1, 1, 0.08)
-
-                                Text {
-                                    id: launchText
-                                    anchors.centerIn: parent
-                                    text: "+ Launch App"
-                                    font.family: Config.bodyFont
-                                    font.pixelSize: 10
-                                    color: Config.actFg
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: HyprlandLua.launchApp()
-                                }
-                            }
-                        }
-                    }
+                GridLayout {
+                    id: winGrid
+                    width: parent.width
+                    columns: Math.max(1, Math.min(3, root.activeSpaceWindows.length))
+                    columnSpacing: 10
+                    rowSpacing: 10
 
                     Repeater {
                         model: root.activeSpaceWindows
 
                         Rectangle {
-                            id: winCard
+                            id: card
                             required property var modelData
-                            
+                            Layout.fillWidth: true
+                            implicitHeight: 82
+                            radius: 12
+
                             readonly property string appClass: (modelData.lastIpcObject && modelData.lastIpcObject.class) ? modelData.lastIpcObject.class : ""
                             readonly property string winTitle: modelData.title || appClass || "Window"
                             readonly property string winAddress: (modelData.lastIpcObject && modelData.lastIpcObject.address) ? modelData.lastIpcObject.address : ""
                             readonly property bool isWinActive: modelData.activated
 
-                            implicitWidth: 150
-                            implicitHeight: 38
-                            radius: 9
-
-                            color: isWinActive ? Qt.rgba(1, 1, 1, 0.14) : (winCardHover.containsMouse ? Qt.rgba(1, 1, 1, 0.08) : Qt.rgba(1, 1, 1, 0.04))
-                            border.color: isWinActive ? Config.actBg : (winCardHover.containsMouse ? Qt.rgba(1, 1, 1, 0.16) : "transparent")
+                            color: isWinActive ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.18) : (cardHover.containsMouse ? Qt.rgba(1, 1, 1, 0.09) : Qt.rgba(1, 1, 1, 0.05))
+                            border.color: isWinActive ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.45) : (cardHover.containsMouse ? Qt.rgba(1, 1, 1, 0.15) : Qt.rgba(1, 1, 1, 0.07))
                             border.width: 1
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 10
-                                anchors.rightMargin: 10
-                                spacing: 8
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Behavior on border.color { ColorAnimation { duration: 120 } }
 
-                                IconImage {
-                                    source: winCard.appClass !== "" ? Quickshell.iconPath(winCard.appClass.toLowerCase()) : ""
-                                    implicitWidth: 18
-                                    implicitHeight: 18
-                                    Layout.alignment: Qt.AlignVCenter
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 6
+
+                                // Header row: App Icon + App Class + Close Button
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 8
+
+                                    IconImage {
+                                        source: card.appClass !== "" ? Quickshell.iconPath(card.appClass.toLowerCase()) : ""
+                                        implicitWidth: 20
+                                        implicitHeight: 20
+                                        Layout.alignment: Qt.AlignVCenter
+                                    }
+
+                                    Text {
+                                        text: card.appClass !== "" ? card.appClass : "Application"
+                                        color: card.isWinActive ? "#ffffff" : Config.mainFg
+                                        font.family: Config.bodyFont
+                                        font.pixelSize: 12
+                                        font.weight: Font.DemiBold
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Item { Layout.fillWidth: true }
                                 }
 
-                                ColumnLayout {
+                                // Window Title text (clean truncated)
+                                Text {
+                                    text: card.winTitle
+                                    color: Config.dimFg
+                                    font.family: Config.bodyFont
+                                    font.pixelSize: 11
+                                    font.weight: Font.Normal
+                                    elide: Text.ElideRight
                                     Layout.fillWidth: true
-                                    spacing: 1
+                                }
 
-                                    Text {
-                                        text: winCard.appClass !== "" ? winCard.appClass : "App"
-                                        font.family: Config.bodyFont
-                                        font.pixelSize: 11
-                                        font.weight: Font.DemiBold
-                                        color: winCard.isWinActive ? Config.actFg : Config.mainFg
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
+                                // Status badge row
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 6
+
+                                    Rectangle {
+                                        implicitWidth: focusBadge.implicitWidth + 10
+                                        implicitHeight: 16
+                                        radius: 8
+                                        color: card.isWinActive ? Qt.rgba(Config.actBg.r, Config.actBg.g, Config.actBg.b, 0.25) : Qt.rgba(1, 1, 1, 0.08)
+
+                                        Text {
+                                            id: focusBadge
+                                            anchors.centerIn: parent
+                                            text: card.isWinActive ? "Active" : "Focus ↗"
+                                            color: card.isWinActive ? Config.actBg : Config.dimFg
+                                            font.family: Config.bodyFont
+                                            font.pixelSize: 9
+                                            font.weight: Font.DemiBold
+                                        }
                                     }
 
-                                    Text {
-                                        text: winCard.winTitle
-                                        font.family: Config.bodyFont
-                                        font.pixelSize: 9
-                                        color: Qt.rgba(1, 1, 1, 0.5)
-                                        elide: Text.ElideRight
-                                        Layout.fillWidth: true
-                                    }
+                                    Item { Layout.fillWidth: true }
                                 }
                             }
 
                             MouseArea {
-                                id: winCardHover
+                                id: cardHover
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (winCard.winAddress !== "") {
-                                        HyprlandLua.focusWindow(winCard.winAddress);
+                                    if (card.winAddress !== "") {
+                                        HyprlandLua.focusWindow(card.winAddress);
                                     }
                                 }
                             }

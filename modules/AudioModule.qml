@@ -47,7 +47,9 @@ Item {
             isMonoFont: true
 
             onClicked: {
-                if (!root.compactMode) {
+                if (root.compactMode) {
+                    Config.isDeckOpen = true;
+                } else {
                     Config.run("pavucontrol || pavucontrol-qt");
                 }
             }
