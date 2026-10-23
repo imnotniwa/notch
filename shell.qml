@@ -261,4 +261,54 @@ ShellRoot {
             }
         }
     }
+
+    // =========================================================================
+    // Independent Side OSD Capsule Window (Option 1: Apple iOS-Style Side Slider)
+    // =========================================================================
+    Variants {
+        model: Quickshell.screens
+        delegate: Component {
+            PanelWindow {
+                id: osdWindow
+                required property var modelData
+                screen: modelData
+
+                // Display only on the active/focused monitor
+                visible: modelData.name === activeMonitorName && OsdService.isOsdVisible
+
+                WlrLayershell.layer: WlrLayer.Overlay
+                WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+                // Zero exclusiveZone ensures it purely floats over windows without disrupting any layout or tiling
+                exclusiveZone: 0
+
+                anchors {
+                    left: true
+                }
+
+                margins {
+                    left: 24
+                }
+
+                implicitWidth: osdCapsule.implicitWidth
+                implicitHeight: osdCapsule.implicitHeight
+                color: "transparent"
+
+                SideOsdCapsule {
+                    id: osdCapsule
+                    opacity: OsdService.isOsdVisible ? 1.0 : 0.0
+                    transform: Translate {
+                        x: OsdService.isOsdVisible ? 0 : -20
+                        Behavior on x {
+                            NumberAnimation { duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.1 }
+                        }
+                    }
+
+                    Behavior on opacity {
+                        NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+                    }
+                }
+            }
+        }
+    }
 }

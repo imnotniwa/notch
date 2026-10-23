@@ -116,6 +116,16 @@ Item {
     function handleIncomingNotification(notif) {
         if (!notif) return;
 
+        let appName = (notif.appName || "").trim().toLowerCase();
+        let summary = (notif.summary || "").trim().toLowerCase();
+        let body = (notif.body || "").trim().toLowerCase();
+
+        // Filter out HyDE / system volume & brightness notifications so they don't clash with notifications
+        if (appName === "hyde notify" || appName.includes("volume") || appName.includes("brightness") ||
+            summary.includes("volume") || summary.includes("brightness") || summary.includes("muted") || summary.includes("unmuted")) {
+            return;
+        }
+
         try {
             notif.tracked = true;
         } catch (e) {}
